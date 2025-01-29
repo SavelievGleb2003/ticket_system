@@ -2,7 +2,29 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 import os
+
 # Create your models here.
+
+
+class PublishedManager(models.Manager):
+    def get_queryset(self):
+        return(
+            super().get_queryset().filter(status=TurnoverDocument.Status.PUBLISHED)
+        )
+
+class ApprovedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status=TurnoverDocument.Status.Approved)
+
+
+class RejectedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status=TurnoverDocument.Status.Rejected)
+
+
+class UnderReviewManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status=TurnoverDocument.Status.UnderReview)
 
 
 class document_types(models.Model):
@@ -15,11 +37,18 @@ class document_types(models.Model):
 
 class TurnoverDocument(models.Model):
 
+    objects = models.Manager()
+    published = PublishedManager()
+    UnderReview = UnderReviewManager()
+    Approved = ApprovedManager()
+    Rejected = RejectedManager()
+
     class Status(models.TextChoices):
         DRAFT = ('DF', 'Draft')
         UnderReview = ('UR', 'UnderReview')
         Approved = ('A', 'Approved')
         Rejected = ('R', 'Rejected')
+        PUBLISHED = ('PB', 'Published')
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
