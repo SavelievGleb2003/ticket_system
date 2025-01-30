@@ -10,4 +10,4 @@ def TD_list(request):
 
 def TD_detail(request, id):
     single_documents = get_object_or_404(TurnoverDocument, id=id, status=TurnoverDocument.Status.PUBLISHED)
-    return render(request, 'blog/TD/detail', {'single_documents': single_documents})
+    return render(request, 'blog/TD/detail.html', {'single_documents': single_documents})
