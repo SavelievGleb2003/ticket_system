@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.urls import reverse
 import os
 
 # Create your models here.
@@ -59,7 +60,7 @@ class TurnoverDocument(models.Model):
     publish = models.DateTimeField(default=timezone.now)
     document_type = models.ForeignKey(document_types, on_delete=models.CASCADE)
     document_file = models.FileField(upload_to='turnover_documents/')
-    slug = models.SlugField(max_length=250)
+    slug = models.SlugField(max_length=250, unique_for_date='published')
     status = models.CharField(
         max_length=2,
         choices=Status,
@@ -75,3 +76,6 @@ class TurnoverDocument(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('TD:TD_detail', args=[self.publish.year,self.publish.month,self.publish.day,self.slug])

@@ -5,6 +5,6 @@ from . import views
 
 urlpatterns = [
         path('', views.TD_list, name='TD_list'),
-        path('<int:id>/', views.TD_detail, name='TD_detail'),
+        path('<int:year>/<int:month>/<int:day>/<slug:TD>/', views.TD_detail, name='TD_detail'),
 
 ]
