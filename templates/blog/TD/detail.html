@@ -10,4 +10,9 @@
   <a href="{% static single_document.filename %}" target="_blank">
       Open Image
   </a>
+  <p>
+    <a href="{% url "TD:send_email" single_document.id %}">
+        Share this post
+    </a>
+  </p>
 {% endblock %}

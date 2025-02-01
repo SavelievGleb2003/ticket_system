@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from .models import TurnoverDocument
 from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
 from django.views.generic import ListView
-
+from .forms import EmailTD_form
+from django.core.mail import send_mail
 
 class ListTD(ListView):
     queryset = TurnoverDocument.published.all()
@@ -18,6 +19,39 @@ def TD_detail(request, year, month, day, TD):
         publish_by__month=month,
         publish_by__day=day
     )
-
-
     return render(request, 'blog/TD/detail.html', {'single_document': single_document})
+
+
+def send_email(request, id_d):
+    Document = get_object_or_404(TurnoverDocument, id=id_d,
+                                 status=TurnoverDocument.Status.PUBLISHED)
+    sent = False
+    if request.method == 'POST':
+        form = EmailTD_form(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            post_url = request.build_absolute_uri(
+                Document.get_absolute_url()
+            )
+            subject = (
+                f"{cd['name']} ({cd['email']}) "
+                f"recommends you read {Document.title}"
+            )
+            message = (
+                f"Read {Document.title} at {post_url}\n\n"
+                f"{cd['name']}\'s comments: {cd['comments']}"
+            )
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=None,
+                recipient_list=[cd['to']]
+            )
+        sent = True
+    else:
+        form = EmailTD_form()
+
+    return render(request,'blog/TD/share.html',
+                  {'Document':Document, 'form':form, 'sent':sent})
+
+
