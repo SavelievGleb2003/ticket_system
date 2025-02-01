@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.urls import reverse
+
 import os
 
 # Create your models here.
@@ -15,17 +16,17 @@ class PublishedManager(models.Manager):
 
 class ApprovedManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(status=TurnoverDocument.Status.Approved)
+        return super().get_queryset().filter(status=TurnoverDocument.Status.APPROVED)
 
 
 class RejectedManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(status=TurnoverDocument.Status.Rejected)
+        return super().get_queryset().filter(status=TurnoverDocument.Status.REJECTED)
 
 
 class UnderReviewManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(status=TurnoverDocument.Status.UnderReview)
+        return super().get_queryset().filter(status=TurnoverDocument.Status.UNDER_REVIEW)
 
 
 class document_types(models.Model):
@@ -37,45 +38,46 @@ class document_types(models.Model):
 
 
 class TurnoverDocument(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = 'DF', 'Draft'
+        UNDER_REVIEW = 'UR', 'Under Review'
+        APPROVED = 'A', 'Approved'
+        REJECTED = 'R', 'Rejected'
+        PUBLISHED = 'PB', 'Published'
 
+    # Менеджеры
     objects = models.Manager()
     published = PublishedManager()
-    UnderReview = UnderReviewManager()
-    Approved = ApprovedManager()
-    Rejected = RejectedManager()
-
-    class Status(models.TextChoices):
-        DRAFT = ('DF', 'Draft')
-        UnderReview = ('UR', 'UnderReview')
-        Approved = ('A', 'Approved')
-        Rejected = ('R', 'Rejected')
-        PUBLISHED = ('PB', 'Published')
+    under_review = UnderReviewManager
+    approved = ApprovedManager
+    rejected = RejectedManager
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     auther = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='document_post')
-    department = models.CharField(max_length=255) #?????????
-    publish = models.DateTimeField(default=timezone.now)
+    department = models.CharField(max_length=255)
+    publish_by = models.DateTimeField(default=timezone.now)
     document_type = models.ForeignKey(document_types, on_delete=models.CASCADE)
-    document_file = models.FileField(upload_to='turnover_documents/')
-    slug = models.SlugField(max_length=250, unique_for_date='published')
+    document_file = models.FileField(upload_to='blog/static/images/')
+    slug = models.SlugField(max_length=250, unique_for_date='publish_by')
     status = models.CharField(
         max_length=2,
-        choices=Status,
+        choices=Status.choices,
         default=Status.DRAFT
     )
 
     class Meta:
-        ordering = ['-publish']
-        indexes = [models.Index(fields=['-publish'])]
+        ordering = ['-publish_by']
+        indexes = [models.Index(fields=['-publish_by'])]
 
     def filename(self):
-        return os.path.basename(self.document_file.name)
+        return 'images/' + os.path.basename(self.document_file.name)
 
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('TD:TD_detail', args=[self.publish.year,self.publish.month,self.publish.day,self.slug])
+        return reverse('TD:TD_detail', args=[self.publish_by.year, self.publish_by.month, self.publish_by.day, self.slug])
+

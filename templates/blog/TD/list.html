@@ -14,8 +14,11 @@
     </p>
     {{ post.description|truncatewords:30|linebreaks }}
 
-     <a href="{% static 'images/app.cvmaker.com.ua_.png' %}" target="_blank">
+     <a href="{% static post.filename %}" target="_blank">
+
             Open Image
      </a>
+
   {% endfor %}
+   {% include "pagination.html" with page=page_obj %}
 {% endblock %}

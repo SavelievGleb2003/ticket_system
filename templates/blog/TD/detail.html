@@ -1,9 +1,13 @@
 {% extends "blog/base.html" %}
-{% block title %}{{ single_documents.title }}{% endblock %}
+{% load static %}
+{% block title %}{{ single_document.title }}{% endblock %}
 {% block content %}
-  <h1>{{ single_documents.title }}</h1>
+  <h1>{{ single_document.title }}</h1>
   <p class="date">
-    Published {{ single_documents.publish }} by {{ single_documents.auther }}
+    Published {{ single_document.publish_by }} by {{ single_document.auther }}
   </p>
-  {{ single_documents.description|linebreaks }}
+  {{ single_document.description|linebreaks }}
+  <a href="{% static single_document.filename %}" target="_blank">
+      Open Image
+  </a>
 {% endblock %}
