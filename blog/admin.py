@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import TurnoverDocument, document_types
+from .models import TurnoverDocument, document_types, Comment
 # Register your models here.
 
 
@@ -24,4 +24,10 @@ class TurnoverDocumentAdmin(admin.ModelAdmin):
     ordering = ['status', 'publish_by', 'updated_at']
     show_facets = admin.ShowFacets.ALWAYS
 
-    
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'email', 'description', 'document',
+                    'created_at', 'updated_at', 'active']
+    list_filter = ['active','created_at', 'updated_at', ]
+    search_fields = ['name', 'description']
+    ordering = ['name', 'email', 'description']

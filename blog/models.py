@@ -81,3 +81,19 @@ class TurnoverDocument(models.Model):
     def get_absolute_url(self):
         return reverse('TD:TD_detail', args=[self.publish_by.year, self.publish_by.month, self.publish_by.day, self.slug])
 
+
+class Comment(models.Model):
+    document = models.ForeignKey(TurnoverDocument, on_delete=models.CASCADE, related_name='comments')
+    name = models.CharField(max_length=80)
+    email = models.EmailField()
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering=['created_at']
+        indexes = [models.Index(fields=['created_at'])]
+
+    def __str__(self):
+        return f'comment by {self.name} on {self.document}'
