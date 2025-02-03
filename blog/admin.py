@@ -16,10 +16,10 @@ class TurnoverDocumentAdmin(admin.ModelAdmin):
     list_display = ['title', 'status','description', 'department', 'publish_by',
                     'document_type','document_file',
                     'filename', 'created_at', 'updated_at']
-    list_filter = ['status', 'created_at', 'publish_by', 'auther', 'updated_at']
+    list_filter = ['status', 'created_at', 'publish_by', 'author', 'updated_at']
     search_fields = ['title', 'description']
     prepopulated_fields = {'slug': ('title',)}
-    raw_id_fields = ['auther']
+    raw_id_fields = ['author']
     date_hierarchy = 'publish_by'
     ordering = ['status', 'publish_by', 'updated_at']
     show_facets = admin.ShowFacets.ALWAYS

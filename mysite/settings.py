@@ -33,6 +33,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 ALLOWED_HOSTS = []
+AUTH_USER_MODEL = 'blog.CustomUser'
 
 
 # Application definition

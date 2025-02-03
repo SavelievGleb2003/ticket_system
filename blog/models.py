@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.urls import reverse
+from django.contrib.auth.models import AbstractUser
 
 import os
 
@@ -37,6 +38,18 @@ class document_types(models.Model):
         return self.type_name
 
 
+class Department(models.Model):
+    name = models.CharField(max_length=80)
+    location = models.CharField(max_length=80)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class CustomUser(AbstractUser):
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+
+
 class TurnoverDocument(models.Model):
     class Status(models.TextChoices):
         DRAFT = 'DF', 'Draft'
@@ -54,9 +67,10 @@ class TurnoverDocument(models.Model):
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='document_post')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    auther = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='document_post')
+
     department = models.CharField(max_length=255)
     publish_by = models.DateTimeField(default=timezone.now)
     document_type = models.ForeignKey(document_types, on_delete=models.CASCADE)
@@ -67,6 +81,7 @@ class TurnoverDocument(models.Model):
         choices=Status.choices,
         default=Status.DRAFT
     )
+
 
     class Meta:
         ordering = ['-publish_by']
@@ -80,6 +95,11 @@ class TurnoverDocument(models.Model):
 
     def get_absolute_url(self):
         return reverse('TD:TD_detail', args=[self.publish_by.year, self.publish_by.month, self.publish_by.day, self.slug])
+
+
+
+
+
 
 
 class Comment(models.Model):
