@@ -71,7 +71,6 @@ class TurnoverDocument(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    department = models.CharField(max_length=255)
     publish_by = models.DateTimeField(default=timezone.now)
     document_type = models.ForeignKey(document_types, on_delete=models.CASCADE)
     document_file = models.FileField(upload_to='blog/static/images/')

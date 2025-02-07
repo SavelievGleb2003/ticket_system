@@ -1,6 +1,6 @@
 from django.contrib import admin
-
-from .models import TurnoverDocument, document_types, Comment
+from django.contrib.auth.admin import UserAdmin
+from .models import TurnoverDocument, document_types, Comment, CustomUser, Department
 # Register your models here.
 
 
@@ -13,7 +13,7 @@ class document_typesAdmin(admin.ModelAdmin):
 
 @admin.register(TurnoverDocument)
 class TurnoverDocumentAdmin(admin.ModelAdmin):
-    list_display = ['title', 'status','description', 'department', 'publish_by',
+    list_display = ['title', 'status','description', 'publish_by',
                     'document_type','document_file',
                     'filename', 'created_at', 'updated_at']
     list_filter = ['status', 'created_at', 'publish_by', 'author', 'updated_at']
@@ -31,3 +31,27 @@ class CommentAdmin(admin.ModelAdmin):
     list_filter = ['active','created_at', 'updated_at', ]
     search_fields = ['name', 'description']
     ordering = ['name', 'email', 'description']
+
+
+
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'location','description', 'created_at', 'updated_at']
+    list_filter = ['created_at', 'updated_at']
+    search_fields = ['name', 'description']
+    ordering = ['name', 'description']
+
+
+
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    model = CustomUser
+    fieldsets = UserAdmin.fieldsets + (
+        ("Additional Info", {"fields": ("department",)}),
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ("Additional Info", {"fields": ("department",)}),
+    )
+    list_display = ("username", "email", "first_name", "last_name", "department", "is_staff", "is_active")
+    search_fields = ("username", "email", "first_name", "last_name", "department__name")
+    list_filter = ("department", "is_staff", "is_active")
