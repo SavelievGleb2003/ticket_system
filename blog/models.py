@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.urls import reverse
-from django.contrib.auth.models import AbstractUser
+
 
 import os
 
@@ -46,8 +46,6 @@ class Department(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class CustomUser(AbstractUser):
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
 
 
 class TurnoverDocument(models.Model):

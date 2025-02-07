@@ -2,9 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import TurnoverDocument
 from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
 from django.views.generic import ListView
-from .forms import CommentForm, EmailTD_form, CreateUserForm
+from .forms import CommentForm, EmailTD_form
 from django.core.mail import send_mail
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponse
 
 class ListTD(ListView):
     queryset = TurnoverDocument.published.all()
@@ -72,13 +73,3 @@ def add_comment(request, id_d):
                   'blog/TD/Comment.html',{'document':document,'form':form, 'comment':comment})
 
 
-
-def register(request):
-    form = CreateUserForm()
-    if request.method=="POST":
-        form = CreateUserForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('list.html')
-    context = {'form': form}
-    return render(request, 'blog/TD/create_user.html', context)
