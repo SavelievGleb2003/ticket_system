@@ -1,7 +1,17 @@
 from django.contrib import admin
-from .models import CustomUser
+from .models import CustomUser, Department
 from django.contrib.auth.admin import UserAdmin
+
 # Register your models here.
+
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'location','description', 'created_at', 'updated_at']
+    list_filter = ['created_at', 'updated_at']
+    search_fields = ['name', 'description']
+    ordering = ['name', 'description']
+
+
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser

@@ -12,6 +12,7 @@ class ListTD(ListView):
     template_name = 'blog/TD/list.html'
     paginate_by = 5
     context_object_name = 'all_documents'
+
 def TD_detail(request, year, month, day, TD):
     single_document = get_object_or_404(
         TurnoverDocument,

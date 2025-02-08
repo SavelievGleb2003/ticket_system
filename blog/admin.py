@@ -1,13 +1,13 @@
 from django.contrib import admin
 
-from .models import TurnoverDocument, document_types, Comment, Department
+from .models import TurnoverDocument, document_types, Comment
 # Register your models here.
 
 
 
 @admin.register(document_types)
 class document_typesAdmin(admin.ModelAdmin):
-    list_display = ['description']
+    list_display = ['type_name', 'description']
 
 
 
@@ -34,12 +34,6 @@ class CommentAdmin(admin.ModelAdmin):
 
 
 
-@admin.register(Department)
-class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ['name', 'location','description', 'created_at', 'updated_at']
-    list_filter = ['created_at', 'updated_at']
-    search_fields = ['name', 'description']
-    ordering = ['name', 'description']
 
 
 

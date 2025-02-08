@@ -38,12 +38,8 @@ class document_types(models.Model):
         return self.type_name
 
 
-class Department(models.Model):
-    name = models.CharField(max_length=80)
-    location = models.CharField(max_length=80)
-    description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
+
 
 
 
