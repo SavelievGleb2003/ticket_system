@@ -1,8 +1,8 @@
 {% extends "blog/base.html" %}
 {% load static %}
-{% block title %}My Blog{% endblock %}
+{% block title %}All document{% endblock %}
 {% block content %}
-  <h1>My Blog</h1>
+  <h1>My document</h1>
   {% for post in all_documents %}
     <h2>
         <a href="{{ post.get_absolute_url }}">
@@ -10,7 +10,7 @@
         </a>
     </h2>
     <p class="date">
-      Published {{ post.publish }} by {{ post.auther }}
+      Published {{ post.publish }} by {{ post.author }}
     </p>
     {{ post.description|truncatewords:30|linebreaks }}
 
