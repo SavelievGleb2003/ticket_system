@@ -4,6 +4,7 @@ from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
 from django.views.generic import ListView
 from .forms import CommentForm, EmailTD_form
 from django.core.mail import send_mail
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 
@@ -26,7 +27,7 @@ def TD_detail(request, year, month, day, TD):
     form = CommentForm()
     return render(request, 'blog/TD/detail.html', {'single_document': single_document,'form': form, 'comments':comments})
 
-
+@login_required
 def send_email(request, id_d):
     Document = get_object_or_404(TurnoverDocument, id=id_d,
                                  status=TurnoverDocument.Status.PUBLISHED)
@@ -39,12 +40,12 @@ def send_email(request, id_d):
                 Document.get_absolute_url()
             )
             subject = (
-                f"{cd['name']} ({cd['email']}) "
+                f"{request.user.username} ({request.user.email}) "
                 f"recommends you read {Document.title}"
             )
             message = (
                 f"Read {Document.title} at {post_url}\n\n"
-                f"{cd['name']}\'s comments: {cd['comments']}"
+                f"{request.user.username}\'s comments: {cd['comments']}"
             )
             send_mail(
                 subject=subject,

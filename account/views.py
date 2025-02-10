@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth.views import PasswordChangeView, PasswordResetView, PasswordResetConfirmView
 
 # Create your views here.
 def user_login(request):
@@ -44,6 +44,15 @@ def dashboard(request):
                   'account/dashboard.html',
                   {'section': 'dashboard'})
 
+
+class my_PasswordChangeView(PasswordChangeView):
+    success_url = reverse_lazy("account:password_change_done")
+
+class my_PasswordResetView(PasswordResetView):
+    success_url = reverse_lazy("account:password_reset_done")
+
+class my_PasswordResetConfirmView(PasswordResetConfirmView):
+    success_url = reverse_lazy("account:password_reset_complete")
 
 class my_PasswordChangeView(PasswordChangeView):
     success_url = reverse_lazy("account:password_change_done")

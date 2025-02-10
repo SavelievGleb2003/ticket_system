@@ -35,8 +35,8 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 ALLOWED_HOSTS = []
 AUTH_USER_MODEL = 'account.CustomUser'
 LOGIN_REDIRECT_URL = 'account:dashboard'
-LOGIN_URL = 'login'
-LOGOUT_URL = 'logout'
+LOGIN_URL = 'account:login'
+LOGOUT_URL = 'account:logout'
 
 # Application definition
 
