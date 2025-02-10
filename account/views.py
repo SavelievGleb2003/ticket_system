@@ -4,6 +4,7 @@ from .forms import CreateUserForm, LoginForm
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def user_login(request):
@@ -35,3 +36,11 @@ def register(request):
             return redirect('list.html')
     context = {'form': form}
     return render(request, 'blog/TD/create_user.html', context)
+
+@login_required
+def dashboard(request):
+    return render(request,
+                  'account/dashboard.html',
+                  {'section': 'dashboard'})
+
+
