@@ -5,14 +5,28 @@ from django.views.generic import ListView
 from .forms import CommentForm, EmailTD_form
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
-from django.http import HttpResponse
+from taggit.models import Tag
+
 
 class ListTD(ListView):
-    queryset = TurnoverDocument.published.all()
+    model = TurnoverDocument
     template_name = 'blog/TD/list.html'
-    paginate_by = 5
     context_object_name = 'all_documents'
+    paginate_by = 5
+
+    def get_queryset(self):
+        queryset = TurnoverDocument.published.all()
+        tag_slug = self.kwargs.get('tag_slug')
+        if tag_slug:
+            tag = get_object_or_404(Tag, slug=tag_slug)
+            queryset = queryset.filter(tags__in=[tag])
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag_slug = self.kwargs.get('tag_slug')
+        context['tag'] = get_object_or_404(Tag, slug=tag_slug) if tag_slug else None
+        return context
 
 def TD_detail(request, year, month, day, TD):
     single_document = get_object_or_404(
@@ -60,7 +74,7 @@ def send_email(request, id_d):
     return render(request,'blog/TD/share.html',
                   {'Document':Document, 'form':form, 'sent':sent})
 
-
+@login_required
 def add_comment(request, id_d):
     document = get_object_or_404(TurnoverDocument, id=id_d,
                                  status=TurnoverDocument.Status.PUBLISHED)

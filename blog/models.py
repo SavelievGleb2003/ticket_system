@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.urls import reverse
-
+from taggit.managers import TaggableManager
 
 import os
 
@@ -44,6 +44,7 @@ class document_types(models.Model):
 
 
 
+
 class TurnoverDocument(models.Model):
     class Status(models.TextChoices):
         DRAFT = 'DF', 'Draft'
@@ -74,6 +75,7 @@ class TurnoverDocument(models.Model):
         choices=Status.choices,
         default=Status.DRAFT
     )
+    tags = TaggableManager()
 
 
     class Meta:

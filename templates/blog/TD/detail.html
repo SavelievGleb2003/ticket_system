@@ -33,5 +33,7 @@
   {% empty %}
     <p>There are no comments.</p>
   {% endfor %}
-  {% include "blog/TD/includes/comment_form.html" %}
+  {% if request.user.is_authenticated %}
+    {% include "blog/TD/includes/comment_form.html" %}
+  {% endif %}
 {% endblock %}
