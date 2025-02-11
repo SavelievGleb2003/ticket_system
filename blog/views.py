@@ -28,6 +28,7 @@ class ListTD(ListView):
         context['tag'] = get_object_or_404(Tag, slug=tag_slug) if tag_slug else None
         return context
 
+@login_required
 def TD_detail(request, year, month, day, TD):
     single_document = get_object_or_404(
         TurnoverDocument,

@@ -15,6 +15,12 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
+    def save_model(self, request, obj, form, change):
+        is_new = obj.pk is None  # Check if it's a new user
+        super().save_model(request, obj, form, change)
+        if is_new:
+            Profile.objects.create(user=obj)
+
     model = CustomUser
     fieldsets = UserAdmin.fieldsets + (
         ("Additional Info", {"fields": ("department",)}),
