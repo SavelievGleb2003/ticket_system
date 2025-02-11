@@ -4,6 +4,8 @@ from . import views
 # create urls
 
 urlpatterns = [
+        path("folders/", views.folder_list, name="folder_list"),
+        path("folders/<int:parent_id>/", views.folder_list, name="folder_detail"),
         path('', views.ListTD.as_view(), name='TD_list'),
         re_path(
                 r'^TD/tag/(?P<tag_slug>[\w-]+)/$', views.ListTD.as_view(), name='TD_list_by_tag'

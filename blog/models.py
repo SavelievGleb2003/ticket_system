@@ -15,19 +15,8 @@ class PublishedManager(models.Manager):
             super().get_queryset().filter(status=TurnoverDocument.Status.PUBLISHED)
         )
 
-class ApprovedManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(status=TurnoverDocument.Status.APPROVED)
 
 
-class RejectedManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(status=TurnoverDocument.Status.REJECTED)
-
-
-class UnderReviewManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(status=TurnoverDocument.Status.UNDER_REVIEW)
 
 
 class document_types(models.Model):
@@ -38,27 +27,24 @@ class document_types(models.Model):
         return self.type_name
 
 
+class Folder(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    parent = models.ForeignKey(
+        "self", on_delete=models.CASCADE, null=True, blank=True, related_name="subfolders"
+    )
 
-
-
-
-
+    def __str__(self):
+        return self.name
 
 
 class TurnoverDocument(models.Model):
     class Status(models.TextChoices):
         DRAFT = 'DF', 'Draft'
-        UNDER_REVIEW = 'UR', 'Under Review'
-        APPROVED = 'A', 'Approved'
-        REJECTED = 'R', 'Rejected'
         PUBLISHED = 'PB', 'Published'
 
     # Менеджеры
     objects = models.Manager()
     published = PublishedManager()
-    under_review = UnderReviewManager
-    approved = ApprovedManager
-    rejected = RejectedManager
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -77,6 +63,7 @@ class TurnoverDocument(models.Model):
     )
     tags = TaggableManager()
 
+    folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name="documents")
 
     class Meta:
         ordering = ['-publish_by']

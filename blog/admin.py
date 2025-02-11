@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import TurnoverDocument, document_types, Comment
+from .models import TurnoverDocument, document_types, Comment, Folder
 # Register your models here.
 
 
@@ -9,6 +9,11 @@ from .models import TurnoverDocument, document_types, Comment
 class document_typesAdmin(admin.ModelAdmin):
     list_display = ['type_name', 'description']
 
+
+@admin.register(Folder)
+class FolderAdmin(admin.ModelAdmin):
+    list_display = ("name", "parent")
+    search_fields = ['name']
 
 
 @admin.register(TurnoverDocument)

@@ -7,6 +7,25 @@ from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from taggit.models import Tag
 
+from django.shortcuts import render, get_object_or_404
+from .models import Folder, TurnoverDocument
+
+def folder_list(request, parent_id=None):
+    if parent_id:
+        parent_folder = get_object_or_404(Folder, id=parent_id)
+        folders = parent_folder.subfolders.all()
+        documents = parent_folder.documents.all()
+    else:
+        parent_folder = None
+        folders = Folder.objects.filter(parent__isnull=True)  # Только корневые папки
+        documents = TurnoverDocument.objects.filter(folder__isnull=True)  # Документы без папки
+
+    return render(request, "folders/folder_list.html", {
+        "parent_folder": parent_folder,
+        "folders": folders,
+        "documents": documents,
+    })
+
 
 class ListTD(ListView):
     model = TurnoverDocument
@@ -84,6 +103,8 @@ def add_comment(request, id_d):
     form = CommentForm(request.POST)
     if form.is_valid():
         comment = form.save(commit=False)
+        comment.name = request.user.username
+        comment.email = request.user.email
         comment.document = document
         comment.save()
     return render(request,

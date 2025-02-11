@@ -1,0 +1,24 @@
+
+<h1>{% if parent_folder %}Папка: {{ parent_folder.name }}{% else %}Все папки{% endif %}</h1>
+
+{% if parent_folder %}
+    <a href="{% url 'TD:folder_list' %}">⬅ Вернуться к корневым папкам</a>
+{% endif %}
+
+<h2>Папки:</h2>
+<ul>
+    {% for folder in folders %}
+        <li><a href="{% url 'TD:folder_detail' folder.id %}">{{ folder.name }}</a></li>
+    {% empty %}
+        <li>Нет папок</li>
+    {% endfor %}
+</ul>
+
+<h2>Документы:</h2>
+<ul>
+    {% for doc in documents %}
+        <li><a href="{{ doc.get_absolute_url }}">{{ doc.title }}</a></li>
+    {% empty %}
+        <li>Нет документов</li>
+    {% endfor %}
+</ul>

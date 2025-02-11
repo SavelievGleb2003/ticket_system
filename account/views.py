@@ -70,5 +70,3 @@ class my_PasswordResetView(PasswordResetView):
 class my_PasswordResetConfirmView(PasswordResetConfirmView):
     success_url = reverse_lazy("account:password_reset_complete")
 
-class my_PasswordChangeView(PasswordChangeView):
-    success_url = reverse_lazy("account:password_change_done")
