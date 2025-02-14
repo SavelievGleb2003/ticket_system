@@ -26,3 +26,22 @@ def create_ticket(request):
     else:
         form = TicketForm()
     return render(request, 'tickets/create_ticket.html', {'form': form})
+
+
+
+def accept_task(request, task_id):
+    # Get the task by ID
+    task = get_object_or_404(Ticket, id=task_id)
+
+    # Check if the user is eligible to accept the task (e.g., same department, correct position)
+    if task.department == request.user.department and task.status == 'open':
+        # Assign the task to the current user and update status
+        task.assigned_to = request.user
+        task.status = 'in_progress'
+        task.save()
+
+        # Redirect to the task list or a success page
+        return redirect('task_list')  # Replace with the actual task list view name
+
+    # If the task can't be accepted, redirect to an error page or the task detail page
+    return redirect('task_detail', task_id=task.id)  # Replace with the task detail view name
