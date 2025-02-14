@@ -37,12 +37,11 @@ AUTH_USER_MODEL = 'account.CustomUser'
 LOGIN_REDIRECT_URL = 'account:dashboard'
 LOGIN_URL = 'account:login'
 LOGOUT_URL = 'account:logout'
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+#MEDIA_URL = 'media/'
+#MEDIA_ROOT = BASE_DIR / 'media'
 # Application definition
 
 INSTALLED_APPS = [
-
     'account.apps.AccountConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -51,7 +50,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'taggit',
-    'blog.apps.BlogConfig'
+    'blog.apps.BlogConfig',
+    'tickets.apps.TicketsConfig',
+
+
 
 ]
 

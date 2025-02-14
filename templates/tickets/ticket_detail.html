@@ -1,0 +1,18 @@
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+<h2>{{ ticket.title }}</h2>
+<p>{{ ticket.description }}</p>
+<p><strong>Status:</strong> {{ ticket.status }}</p>
+<p><strong>Created by:</strong> {{ ticket.created_by.username }}</p>
+
+{% if ticket.screenshot %}
+    <h3>Screenshot:</h3>
+    <a href="{% static ticket.filename %}" target="_blank">
+      Open Image
+    </a>
+{% else %}
+    <p>No screenshot attached.</p>
+{% endif %}
+
+{% endblock %}
