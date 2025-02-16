@@ -1,13 +1,25 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+
 from django.contrib.auth.decorators import login_required
 from .models import Ticket
 from .forms import TicketForm
 
 @login_required
 def ticket_list(request):
-    tickets = Ticket.objects.all()
+    user = request.user  # Получаем текущего пользователя
+
+    if user.is_authenticated:  # Проверяем, авторизован ли пользователь
+        tickets = Ticket.objects.filter(
+            department=user.department,
+            position=user.position
+        )
+    else:
+        tickets = Ticket.objects.none()  # Если пользователь не авторизован, не показываем тикеты
+
     return render(request, 'tickets/ticket_list.html', {'tickets': tickets})
+
 
 @login_required
 def ticket_detail(request, ticket_id):
@@ -27,21 +39,24 @@ def create_ticket(request):
         form = TicketForm()
     return render(request, 'tickets/create_ticket.html', {'form': form})
 
+@login_required
+def accept_ticket(request, ticket_id):
+    # Получаем задачу по ID
+    ticket = get_object_or_404(Ticket, id=ticket_id)
 
+    # Проверяем, может ли пользователь принять задачу
+    if ticket.status != 'open':
+        messages.error(request, "Эта задача уже занята или завершена.")
+        return redirect('tickets:ticket_list')
 
-def accept_task(request, task_id):
-    # Get the task by ID
-    task = get_object_or_404(Ticket, id=task_id)
+    if ticket.department != request.user.department or ticket.position != request.user.position:
+        messages.error(request, "У вас нет прав на принятие этой задачи.")
+        raise PermissionDenied("Вы не можете принять эту задачу.")
 
-    # Check if the user is eligible to accept the task (e.g., same department, correct position)
-    if task.department == request.user.department and task.status == 'open':
-        # Assign the task to the current user and update status
-        task.assigned_to = request.user
-        task.status = 'in_progress'
-        task.save()
+    # Назначаем задачу текущему пользователю и обновляем статус
+    ticket.accepted_by = request.user
+    ticket.status = 'in_progress'
+    ticket.save()
 
-        # Redirect to the task list or a success page
-        return redirect('task_list')  # Replace with the actual task list view name
-
-    # If the task can't be accepted, redirect to an error page or the task detail page
-    return redirect('task_detail', task_id=task.id)  # Replace with the task detail view name
+    messages.success(request, "Задача успешно принята в работу!")
+    return redirect('tickets:ticket_detail', ticket_id=ticket.id)

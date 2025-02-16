@@ -4,7 +4,7 @@ from .models import Ticket, Position
 class TicketForm(forms.ModelForm):
     class Meta:
         model = Ticket
-        fields = ['title', 'description', 'status', 'department', 'position', 'due_date']
+        fields = ['title', 'description','screenshot' , 'department', 'position', 'due_date']
 
     def __init__(self, *args, **kwargs):
         super(TicketForm, self).__init__(*args, **kwargs)

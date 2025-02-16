@@ -37,6 +37,11 @@ AUTH_USER_MODEL = 'account.CustomUser'
 LOGIN_REDIRECT_URL = 'account:dashboard'
 LOGIN_URL = 'account:login'
 LOGOUT_URL = 'account:logout'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
 #MEDIA_URL = 'media/'
 #MEDIA_ROOT = BASE_DIR / 'media'
 # Application definition
@@ -52,6 +57,7 @@ INSTALLED_APPS = [
     'taggit',
     'blog.apps.BlogConfig',
     'tickets.apps.TicketsConfig',
+
 
 
 

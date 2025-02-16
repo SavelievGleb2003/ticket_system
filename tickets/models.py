@@ -22,13 +22,16 @@ class Ticket(models.Model):
     position = models.ForeignKey(Position, on_delete=models.CASCADE, related_name='tickets', null=True, blank=True)
 
 
-    screenshot = models.ImageField(upload_to='blog/static/screenshot/', null=True, blank=True)
+    screenshot = models.ImageField(upload_to='tickets/static/ticket_image/', null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        assigned_info = self.assigned_to.username if self.assigned_to else "Unassigned"
+        assigned_info = self.accepted_by.username if self.accepted_by else "Unassigned"
         department_info = self.department.name if self.department else "No Department"
         position_info = self.position.title if self.position else "No Position"
         return f"{self.title} - {department_info} ({position_info}) - {self.status} - {assigned_info}"
+
+
+
