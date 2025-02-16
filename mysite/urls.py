@@ -23,7 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('TD/', include(('blog.urls', 'TD'), namespace='TD')),
     path('account/', include(('account.urls', 'account'), namespace='account')),
-    path('tickets/', include(('tickets.urls', 'tickets'), namespace='tickets'))
+    path('tickets/', include(('tickets.urls', 'tickets'), namespace='tickets')),
+    path('chat/', include(('chat.urls', 'chat'), namespace='chat'))
 ]
 if settings.DEBUG:
     urlpatterns += static(

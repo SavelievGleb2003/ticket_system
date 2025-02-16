@@ -9,16 +9,20 @@
 {% if ticket.screenshot %}
     <h3>Screenshot:</h3>
     <a href="{{ ticket.screenshot.url }}" target="_blank">Открыть файл</a>
-
 {% else %}
     <p>No screenshot attached.</p>
 {% endif %}
+
 {% if ticket.status == 'open' %}
     <form action="{% url 'tickets:accept_ticket' ticket.id %}" method="post">
         {% csrf_token %}
         <button type="submit">Принять задачу</button>
     </form>
 {% elif ticket.status == 'in_progress' %}
+    <!-- Ссылка на чат, доступна когда тикет в работе -->
+    <p>
+        <a href="{% url 'chat:chat_detail' ticket.id %}">Перейти в чат</a>
+    </p>
     <form action="{% url 'tickets:accept_ticket' ticket.id %}" method="post">
         {% csrf_token %}
         <button type="submit">Принять задачу</button>
