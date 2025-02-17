@@ -17,8 +17,11 @@
             <li {% if section == "all_my_ticket" %}class="selected"{% endif %}>
                 <a href="{% url 'tickets:ticket_list' %}">all my ticket</a>
             </li>
-            <li {% if section == "ticket" %}class="selected"{% endif %}>
-                <a href="{% url 'tickets:create_ticket' %}">ticket</a>
+            <li {% if section == "user_documents_and_folders" %}class="selected"{% endif %}>
+                <a href="{% url 'TD:user_documents_and_folders' %}">My Documents &amp; Folders</a>
+            </li>
+            <li {% if section == "documents_by_department" %}class="selected"{% endif %}>
+                <a href="{% url 'TD:documents_by_department' %}">My Department Documents &amp; Folders</a>
             </li>
             <li {% if section == "images" %}class="selected"{% endif %}>
                 <a href="#">Images</a>

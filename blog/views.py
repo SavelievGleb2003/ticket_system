@@ -6,9 +6,11 @@ from .forms import CommentForm, EmailTD_form
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from taggit.models import Tag
+from django.contrib import messages
 
 from django.shortcuts import render, get_object_or_404
 from .models import Folder, TurnoverDocument
+from account.models import Department
 
 def folder_list(request, parent_id=None):
     if parent_id:
@@ -25,6 +27,8 @@ def folder_list(request, parent_id=None):
         "folders": folders,
         "documents": documents,
     })
+
+
 
 
 class ListTD(ListView):
@@ -47,6 +51,56 @@ class ListTD(ListView):
         context['tag'] = get_object_or_404(Tag, slug=tag_slug) if tag_slug else None
         return context
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import TurnoverDocument, Folder
+
+
+@login_required
+def user_documents_and_folders(request):
+    # Get folders that have at least one document created by the current user.
+    folders = Folder.objects.filter(documents__author=request.user).distinct()
+
+    # Build a dictionary: key is folder, value is the queryset of documents (by current user) in that folder.
+    folder_docs = {
+        folder: folder.documents.filter(author=request.user)
+        for folder in folders
+    }
+
+    # Also, get the documents created by the current user that are not assigned to any folder.
+    uncategorized_documents = TurnoverDocument.objects.filter(
+        author=request.user, folder__isnull=True
+    )
+
+    context = {
+        'folder_docs': folder_docs,
+        'uncategorized_documents': uncategorized_documents,
+    }
+    return render(request, 'blog/TD/user_documents_and_folders.html', context)
+
+
+
+
+@login_required
+def documents_by_department(request):
+    if request.user.department:
+        department = get_object_or_404(Department, id=request.user.department.id)
+    else:
+        messages.error(request, "у пользователя нет отдела.")
+        return redirect('TD:folder_list')
+
+    folders = Folder.objects.filter(documents__author__department=department,documents__status=TurnoverDocument.Status.PUBLISHED)
+    folder_docs = {
+        folder: folder.documents.filter(author__department=department)
+        for folder in folders
+    }
+    documents = TurnoverDocument.objects.filter(author__department=department, status=TurnoverDocument.Status.PUBLISHED, folder__isnull=True)
+    return render(request, 'blog/TD/documents_by_department.html', {
+        'folder_docs': folder_docs,
+        'uncategorized_documents': documents,
+    })
+
+
 @login_required
 def TD_detail(request, year, month, day, TD):
     single_document = get_object_or_404(
@@ -60,6 +114,8 @@ def TD_detail(request, year, month, day, TD):
     comments = single_document.comments.filter(active=True)
     form = CommentForm()
     return render(request, 'blog/TD/detail.html', {'single_document': single_document,'form': form, 'comments':comments})
+
+
 
 @login_required
 def send_email(request, id_d):

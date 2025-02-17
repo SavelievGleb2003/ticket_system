@@ -1,0 +1,42 @@
+{% extends "blog/base.html" %}
+
+{% block content %}
+  <h2>Your Documents and Folders</h2>
+
+  {% if folder_docs %}
+    <h3>Folders</h3>
+    <ul>
+      {% for folder, documents in folder_docs.items %}
+        <li>
+          <strong>{{ folder.name }}</strong>
+          {% if documents %}
+            <ul>
+              {% for doc in documents %}
+                <li>
+                  <a href="{{ doc.get_absolute_url }}">{{ doc.title }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>No documents in this folder.</p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You have no folders with documents.</p>
+  {% endif %}
+
+  <h3>Uncategorized Documents</h3>
+  {% if uncategorized_documents %}
+    <ul>
+      {% for doc in uncategorized_documents %}
+        <li>
+          <a href="{{ doc.get_absolute_url }}">{{ doc.title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You have no uncategorized documents.</p>
+  {% endif %}
+{% endblock %}
