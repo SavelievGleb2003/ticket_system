@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .page-container {
+      background-color: #b1b1b1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .content {
+      width: 80%;
+      max-width: 500px;
+      padding: 2rem;
+      max-height: 80vh;
+      background-color: #eef0f2;
+      border-radius: 1rem;
+      box-shadow: 0px 0px 1rem 0px rgba(0, 0, 0, 0.2);
+      display: grid;
+      grid-template-rows: fit-content auto fit-content;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .chats-container {
+      width: 100%;
+      height: 20rem;
+      overflow-y: scroll;
+    }
+
+    textarea {
+      height: 5rem;
+      resize: none;
+      outline: none;
+      border: none;
+      padding: 0.5rem 1rem;
+      background-color: #dadee1;
+      border-radius: 0.5rem;
+      width: 100%;
+    }
+
+    button {
+      border: 0;
+      outline: 0;
+      padding: 0.5rem 0.75rem;
+      background-color: #1b1f24;
+      border-radius: 2rem;
+      color: #ffffff;
+      font-size: 1.25rem;
+      font-weight: bold;
+      transition: 0.25s ease;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #353a41;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-container">
+    <div class="content">
+      {% if has_access %}
+        <h1>Chat for Ticket #{{ ticket.id }}</h1>
+        <div class="chats-container" id="chats-container">
+          {% for message in messages %}
+            {% if message.sender == user %}
+              <div class="single-message sent">
+                <div class="msg-body">{{ message.message }}</div>
+                <p class="sender">Me</p>
+              </div>
+            {% else %}
+              <div class="single-message">
+                <div class="msg-body">{{ message.message }}</div>
+                <p class="sender">{{ message.sender.username }}</p>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <form id="msg-form">
+          <textarea id="message" placeholder="Enter your message"></textarea>
+          <button type="submit">&#10003;</button>
+        </form>
+      {% else %}
+        <h1>Доступ запрещен</h1>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if has_access %}
+    <script>
+      const socketURL = `ws://${window.location.host}/ws/chat/{{ ticket.id }}/`;
+      const socket = new WebSocket(socketURL);
+
+      document.getElementById("msg-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        let message_sent = document.getElementById("message").value;
+        socket.send(JSON.stringify({ message: message_sent }));
+      });
+
+      const chats_div = document.getElementById("chats-container");
+
+      socket.addEventListener("message", (e) => {
+        const data = JSON.parse(e.data)["message"];
+        let sender = data["sender"];
+        let content = data["message"];
+
+        if (sender == "{{ user.username }}") {
+          chats_div.innerHTML += `<div class="single-message sent">
+            <div class="msg-body">${content}</div>
+            <p class="sender">Me</p>
+          </div>`;
+        } else {
+          chats_div.innerHTML += `<div class="single-message">
+            <div class="msg-body">${content}</div>
+            <p class="sender">${sender}</p>
+          </div>`;
+        }
+      });
+    </script>
+  {% endif %}
+</body>
+</html>

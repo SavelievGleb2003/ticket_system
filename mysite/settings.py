@@ -41,7 +41,7 @@ LOGIN_URL = 'account:login'
 LOGOUT_URL = 'account:logout'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
+ASGI_APPLICATION = "mysite.asgi.application"
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 #MEDIA_URL = 'media/'
@@ -49,6 +49,7 @@ STATIC_ROOT = BASE_DIR / 'static'
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'account.apps.AccountConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -78,6 +79,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'mysite.urls'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+
 
 TEMPLATES = [
     {

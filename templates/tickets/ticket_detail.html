@@ -5,7 +5,7 @@
 <p>{{ ticket.description }}</p>
 <p><strong>Status:</strong> {{ ticket.status }}</p>
 <p><strong>Created by:</strong> {{ ticket.created_by.username }}</p>
-
+<p><strong>Accepted by:</strong> {{ ticket.accepted_by.username }}</p>
 {% if ticket.screenshot %}
     <h3>Screenshot:</h3>
     <a href="{{ ticket.screenshot.url }}" target="_blank">Открыть файл</a>
@@ -25,7 +25,7 @@
     </p>
     <form action="{% url 'tickets:accept_ticket' ticket.id %}" method="post">
         {% csrf_token %}
-        <button type="submit">Принять задачу</button>
+        <button type="submit">Завершить задачу</button>
     </form>
 {% else %}
     <p>Тикет в ожидании.</p>
