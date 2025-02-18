@@ -23,7 +23,7 @@
     <p>
         <a href="{% url 'chat:chat_detail' ticket.id %}">Перейти в чат</a>
     </p>
-    <form action="{% url 'tickets:accept_ticket' ticket.id %}" method="post">
+    <form action="{% url 'tickets:close_ticket' ticket.id %}" method="post">
         {% csrf_token %}
         <button type="submit">Завершить задачу</button>
     </form>

@@ -32,8 +32,12 @@ def chat_detail(request, ticket_id):
 
     chat, created = Chat.objects.get_or_create(ticket=ticket)
 
+    # Retrieve all messages for the chat (ordered by timestamp)
+    messages = ChatMessage.objects.filter(chat=chat).order_by('timestamp')
+
     return render(request, 'chat/chat_detail.html', {
         'ticket': ticket,
         'chat': chat,
+        'messages': messages,  # pass messages to template
         'has_access': has_access,  # <-- передаем в шаблон
     })
