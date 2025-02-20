@@ -1,9 +1,50 @@
 {% extends "blog/base.html" %}
 {% block content %}
-<h2>Create Ticket</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit</button>
-</form>
+<div class="container mx-auto p-6 flex justify-center">
+    <div class="card bg-base-100 shadow-xl border border-gray-200 p-6 w-full max-w-lg">
+        <h2 class="text-3xl font-bold mb-4 text-center">Create Ticket</h2>
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">Title</span>
+                </label>
+                {{ form.title }}
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">Description</span>
+                </label>
+                {{ form.description }}
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">Department</span>
+                </label>
+                {{ form.department }}
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">Position</span>
+                </label>
+                {{ form.position }}
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">Due Date</span>
+                </label>
+                {{ form.due_date }}
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">Attach Screenshot</span>
+                </label>
+                {{ form.screenshot }}
+            </div>
+            <div class="flex justify-center">
+                <button type="submit" class="btn btn-primary w-full">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

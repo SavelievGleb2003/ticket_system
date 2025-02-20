@@ -78,9 +78,6 @@ def user_documents_and_folders(request):
     }
     return render(request, 'blog/TD/user_documents_and_folders.html', context)
 
-
-
-
 @login_required
 def documents_by_department(request):
     if request.user.department:

@@ -49,6 +49,7 @@ STATIC_ROOT = BASE_DIR / 'static'
 # Application definition
 
 INSTALLED_APPS = [
+
     'daphne',
     'account.apps.AccountConfig',
     'django.contrib.admin',
@@ -61,11 +62,19 @@ INSTALLED_APPS = [
     'blog.apps.BlogConfig',
     'tickets.apps.TicketsConfig',
     'chat.apps.ChatConfig',
+    'tailwind',
+    'theme',
+    'django_browser_reload',
 
 
 
 
 
+]
+TAILWIND_APP_NAME = 'theme'
+
+INTERNAL_IPS = [
+    "127.0.0.1",
 ]
 
 MIDDLEWARE = [
@@ -76,6 +85,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 ROOT_URLCONF = 'mysite.urls'

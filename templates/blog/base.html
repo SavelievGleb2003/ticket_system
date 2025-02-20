@@ -1,99 +1,76 @@
 {% load static %}
+{% load tailwind_tags %}
+
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <title>{% block title %}{% endblock %}</title>
-  <link href="{% static "css/blog.css" %}" rel="stylesheet">
+    {% tailwind_css %}
+    <div class="container mx-auto p-6">
+    {% block content1 %}{% endblock %}
+    </div>
+
 
 </head>
-<body>
- <div id="header">
- <span class="logo"><a href="http://127.0.0.1:8000/TD/">ЮЖК</a></span>
-     {% if request.user.is_authenticated %}
-        <ul class="menu">
-            <li {% if section == "dashboard" %}class="selected"{% endif %}>
-                <a href="{% url "account:dashboard" %}">My dashboard</a>
-            </li>
-            <li {% if section == "all_my_ticket" %}class="selected"{% endif %}>
-                <a href="{% url 'tickets:ticket_list' %}">ticket departament</a>
-            </li>
-            <li {% if section == "user_documents_and_folders" %}class="selected"{% endif %}>
-                <a href="{% url 'TD:user_documents_and_folders' %}">My Documents &amp; Folders</a>
-            </li>
-            <li {% if section == "documents_by_department" %}class="selected"{% endif %}>
-                <a href="{% url 'TD:documents_by_department' %}">My Department Documents &amp; Folders</a>
-            </li>
-             <li {% if section == "ticket_list_created_by" %}class="selected"{% endif %}>
-                <a href="{% url 'tickets:ticket_list_created_by' %}">my ticket</a>
-            </li>
-             <li {% if section == "ticket_list_accepted_by" %}class="selected"{% endif %}>
-                <a href="{% url 'tickets:ticket_list_accepted_by' %}">ticket in work</a>
-            </li>
-            <li {% if section == "people" %}class="selected"{% endif %}>
-            <a href="#">People</a>
-            </li>
-        </ul>
-     {% endif %}
-    <span class="user">
-        {% if request.user.is_authenticated %}
-        Hello {{ request.user.first_name|default:request.user.username }},
-    <form action="{% url "account:logout" %}" method="post">
-        <button type="submit">Logout</button>
-        {% csrf_token %}
-    </form>
-        {% else %}
-        <a href="{% url "account:login" %}">Log-in</a>
-        {% endif %}
-    </span>
-
- </div>
- <div id="message-container" class="message-container">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="message-popup alert-{{ message.tags }}">
-                {{ message }}
+<body class="bg-gray-100">
+    <nav class="navbar bg-base-200 shadow-lg p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="http://127.0.0.1:8000/TD/" class="text-2xl font-bold">ЮЖК</a>
+            {% if request.user.is_authenticated %}
+            <div class="hidden md:flex space-x-4">
+                <a href="{% url 'account:dashboard' %}" class="btn btn-ghost">Dashboard</a>
+                <a href="{% url 'tickets:ticket_list' %}" class="btn btn-ghost">Tickets</a>
+                <a href="{% url 'TD:user_documents_and_folders' %}" class="btn btn-ghost">My Documents</a>
+                <a href="{% url 'TD:documents_by_department' %}" class="btn btn-ghost">Department Docs</a>
+                <a href="{% url 'tickets:ticket_list_created_by' %}" class="btn btn-ghost">My Tickets</a>
+                <a href="{% url 'tickets:ticket_list_accepted_by' %}" class="btn btn-ghost">In Work</a>
+                <a href="#" class="btn btn-ghost">People</a>
             </div>
-        {% endfor %}
-    {% endif %}
-</div>
- <div id="content">
- {% block content %}
- {% endblock %}
- </div>
-</body>
-</html>
+            <div class="dropdown dropdown-end md:hidden">
+                <label tabindex="0" class="btn btn-square btn-ghost">
+                    ☰
+                </label>
+                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-52">
+                    <li><a href="{% url 'account:dashboard' %}">Dashboard</a></li>
+                    <li><a href="{% url 'tickets:ticket_list' %}">Tickets</a></li>
+                    <li><a href="{% url 'TD:user_documents_and_folders' %}">My Documents</a></li>
+                    <li><a href="{% url 'TD:documents_by_department' %}">Department Docs</a></li>
+                    <li><a href="{% url 'tickets:ticket_list_created_by' %}">My Tickets</a></li>
+                    <li><a href="{% url 'tickets:ticket_list_accepted_by' %}">In Work</a></li>
+                    <li><a href="#">People</a></li>
+                </ul>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-lg">Hello, {{ request.user.first_name|default:request.user.username }}</span>
+                <form action="{% url 'account:logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-error">Logout</button>
+                </form>
+            </div>
+            {% else %}
+            <a href="{% url 'account:login' %}" class="btn btn-primary">Log-in</a>
+            {% endif %}
+        </div>
+    </nav>
 
-<script>
-    // Автоматически скрываем сообщение через 3 секунды
-    document.addEventListener("DOMContentLoaded", function () {
-        let messages = document.querySelectorAll(".message-popup");
-        messages.forEach(function (msg) {
+    <div class="container mx-auto p-4">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <div id="message-container" class="fixed top-5 right-5 z-50">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} shadow-lg mb-2">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
             setTimeout(() => {
-                msg.style.opacity = "0";
-                setTimeout(() => msg.remove(), 500); // Удаление после исчезновения
+                document.querySelectorAll(".alert").forEach(el => el.remove());
             }, 3000);
         });
-    });
-</script>
-
-<style>
-    .message-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-    }
-    .message-popup {
-        background-color: #333;
-        color: white;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-        opacity: 1;
-        transition: opacity 0.5s ease-in-out;
-    }
-    .alert-success { background-color: #28a745; }
-    .alert-error { background-color: #dc3545; }
-    .alert-warning { background-color: #ffc107; color: black; }
-    .alert-info { background-color: #17a2b8; }
-</style>
+    </script>
+</body>
+</html>
