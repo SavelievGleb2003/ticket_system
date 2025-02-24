@@ -34,6 +34,7 @@ def ticket_list_created_by(request):
 
     return render(request, 'tickets/ticket_list.html', {'tickets': tickets})
 
+
 @login_required
 def ticket_list_accepted_by(request):
     user = request.user  # Получаем текущего пользователя
@@ -46,6 +47,7 @@ def ticket_list_accepted_by(request):
         tickets = Ticket.objects.none()  # Если пользователь не авторизован, не показываем тикеты
 
     return render(request, 'tickets/ticket_list.html', {'tickets': tickets})
+
 
 @login_required
 def ticket_detail(request, ticket_id):

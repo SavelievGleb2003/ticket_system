@@ -1,28 +1,48 @@
 {% extends "blog/base.html" %}
 {% load static %}
-{% block title %}All document{% endblock %}
+
+{% block title %}Все документы{% endblock %}
+
 {% block content %}
-<h1>{% if parent_folder %}Папка: {{ parent_folder.name }}{% else %}Все папки{% endif %}</h1>
+<div class="container mx-auto p-6">
+    <div class="bg-base-100 shadow-lg rounded-xl p-6">
+        <h1 class="text-2xl font-bold text-primary">{% if parent_folder %}Папка: {{ parent_folder.name }}{% else %}Все папки{% endif %}</h1>
 
-{% if parent_folder %}
-    <a href="{% url 'TD:folder_list' %}">⬅ Вернуться к корневым папкам</a>
-{% endif %}
+        {% if parent_folder %}
+        <div class="mt-4">
+            <a href="{% url 'TD:folder_list' %}" class="btn btn-outline btn-secondary">⬅ Вернуться к корневым папкам</a>
+        </div>
+        {% endif %}
+    </div>
 
-<h2>Папки:</h2>
-<ul>
-    {% for folder in folders %}
-        <li><a href="{% url 'TD:folder_detail' folder.id %}">{{ folder.name }}</a></li>
-    {% empty %}
-        <li>Нет папок</li>
-    {% endfor %}
-</ul>
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Папки -->
+        <div class="bg-base-200 p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-semibold text-accent">Папки</h2>
+            <ul class="mt-4 space-y-2">
+                {% for folder in folders %}
+                    <li>
+                        <a href="{% url 'TD:folder_detail' folder.id %}" class="btn btn-link text-lg">📁 {{ folder.name }}</a>
+                    </li>
+                {% empty %}
+                    <li class="text-gray-500">Нет папок</li>
+                {% endfor %}
+            </ul>
+        </div>
 
-<h2>Документы:</h2>
-<ul>
-    {% for doc in documents %}
-        <li><a href="{{ doc.get_absolute_url }}">{{ doc.title }}</a></li>
-    {% empty %}
-        <li>Нет документов</li>
-    {% endfor %}
-</ul>
+        <!-- Документы -->
+        <div class="bg-base-200 p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-semibold text-accent">Документы</h2>
+            <ul class="mt-4 space-y-2">
+                {% for doc in documents %}
+                    <li>
+                        <a href="{{ doc.get_absolute_url }}" class="btn btn-link text-lg">📄 {{ doc.title }}</a>
+                    </li>
+                {% empty %}
+                    <li class="text-gray-500">Нет документов</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
 {% endblock %}

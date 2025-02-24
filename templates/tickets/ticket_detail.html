@@ -1,5 +1,5 @@
 {% extends "blog/base.html" %}
-{% block content %}
+{% block content2 %}
 <div class="container mx-auto p-6">
     <div class="card bg-base-100 shadow-xl border border-gray-200 p-6">
         <h2 class="text-3xl font-bold mb-2">{{ ticket.title }}</h2>
@@ -33,16 +33,24 @@
 
         <div class="mt-6 flex space-x-4">
             {% if ticket.status == 'open' %}
+                {% if ticket.department == request.user.department and ticket.position == request.user.position %}
                 <form action="{% url 'tickets:accept_ticket' ticket.id %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-warning">Accept Ticket</button>
                 </form>
+                {% else %}
+                    <p class="text-gray-500">you don't have access rights to accept ticket.</p>
+                {% endif %}
             {% elif ticket.status == 'in_progress' %}
                 <a href="{% url 'chat:chat_detail' ticket.id %}" class="btn btn-info">Go to Chat</a>
+                {% if ticket.department == request.user.department and ticket.position == request.user.position %}
                 <form action="{% url 'tickets:close_ticket' ticket.id %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-success">Close Ticket</button>
                 </form>
+                {% else %}
+<!--                    <p class="text-gray-500">you don't have close rights to close ticket.</p>-->
+                {% endif %}
             {% else %}
                 <p class="text-gray-500">Ticket is closed.</p>
             {% endif %}

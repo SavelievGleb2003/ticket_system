@@ -5,10 +5,6 @@
 <html lang="ru">
 <head>
     {% tailwind_css %}
-    <div class="container mx-auto p-6">
-    {% block content1 %}{% endblock %}
-    </div>
-
 
 </head>
 <body class="bg-gray-100">
@@ -53,10 +49,17 @@
     </nav>
 
     <div class="container mx-auto p-4">
-        {% block content %}
+        {% block content2 %}
         {% endblock %}
     </div>
-
+     <div class="container mx-auto p-6">
+        {% block content1 %}
+         {% endblock %}
+    </div>
+    <div class="container mx-auto p-6">
+        {% block content %}
+         {% endblock %}
+    </div>
     <div id="message-container" class="fixed top-5 right-5 z-50">
         {% if messages %}
             {% for message in messages %}
