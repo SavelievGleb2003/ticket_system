@@ -33,8 +33,15 @@ class Folder(models.Model):
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="subfolders"
     )
 
-    def __str__(self):
+    def get_full_path(self):
+        if self.parent:
+            return f"{self.parent.get_full_path()}/{self.name}"
         return self.name
+
+    def __str__(self):
+        return self.get_full_path()
+
+
 
 
 class TurnoverDocument(models.Model):
@@ -69,11 +76,16 @@ class TurnoverDocument(models.Model):
         ordering = ['-publish_by']
         indexes = [models.Index(fields=['-publish_by'])]
 
+    def get_full_path(self):
+        if self.folder:
+            return f"{self.folder.get_full_path()}/{self.title}"
+        return self.title
+
     def filename(self):
         return 'images/' + os.path.basename(self.document_file.name)
 
     def __str__(self):
-        return self.title
+        return self.get_full_path()
 
     def get_absolute_url(self):
         return reverse('TD:TD_detail', args=[self.publish_by.year, self.publish_by.month, self.publish_by.day, self.slug])

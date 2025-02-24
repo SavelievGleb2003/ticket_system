@@ -15,28 +15,29 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 
-def folder_list(request, parent_id=None):
-    if parent_id:
-        parent_folder = get_object_or_404(Folder, id=parent_id)
+def folder_list(request, folder_id=None):
+    if folder_id:
+        parent_folder = get_object_or_404(Folder, id=folder_id)
         folders = parent_folder.subfolders.all()
         documents = parent_folder.documents.all()
-        # Generate the full URL for the parent folder
-        #parent_folder_url = request.build_absolute_uri(reverse('TD:folder_list'))
-        parent_folder_url = request.build_absolute_uri(
-            reverse('TD:folder_list') if parent_folder.parent is None else reverse('TD:folder_detail', args=[parent_folder.parent.id]))
-
     else:
         parent_folder = None
-        folders = Folder.objects.filter(parent__isnull=True)  # Только корневые папки
-        documents = TurnoverDocument.objects.filter(folder__isnull=True)  # Документы без папки
-        parent_folder_url = None
+        folders = Folder.objects.filter(parent__isnull=True)
+        documents = TurnoverDocument.objects.filter(folder__isnull=True)
+
+    breadcrumbs = []
+    temp = parent_folder
+    while temp:
+        breadcrumbs.insert(0, temp)
+        temp = temp.parent
 
     return render(request, "folders/folder_list.html", {
         "parent_folder": parent_folder,
-        "parent_folder_url": parent_folder_url,  # Pass the full URL to the template
+        "breadcrumbs": breadcrumbs,
         "folders": folders,
         "documents": documents,
     })
+
 
 
 class ListTD(ListView):
@@ -65,45 +66,62 @@ from .models import TurnoverDocument, Folder
 
 
 @login_required
-def user_documents_and_folders(request):
-    # Get folders that have at least one document created by the current user.
-    folders = Folder.objects.filter(documents__author=request.user).distinct()
+def user_documents_and_folders(request, folder_id=None):
 
-    # Build a dictionary: key is folder, value is the queryset of documents (by current user) in that folder.
-    folder_docs = {
-        folder: folder.documents.filter(author=request.user)
-        for folder in folders
-    }
+    if folder_id:
+        parent_folder = get_object_or_404(Folder, id=folder_id)
+        folders = parent_folder.subfolders.all()
+        documents = parent_folder.documents.all()
+    else:
+        parent_folder = None
+        folders = Folder.objects.filter(parent__isnull=True, documents__author=request.user).distinct()
+        documents = TurnoverDocument.objects.filter(folder__isnull=True, author=request.user)
 
-    # Also, get the documents created by the current user that are not assigned to any folder.
-    uncategorized_documents = TurnoverDocument.objects.filter(
-        author=request.user, folder__isnull=True
-    )
+    breadcrumbs = []
+    temp = parent_folder
+    while temp:
+        breadcrumbs.insert(0, temp)
+        temp = temp.parent
 
-    context = {
-        'folder_docs': folder_docs,
-        'uncategorized_documents': uncategorized_documents,
-    }
-    return render(request, 'blog/TD/user_documents_and_folders.html', context)
+    return render(request, "folders/folder_list.html", {
+        "parent_folder": parent_folder,
+        "breadcrumbs": breadcrumbs,
+        "folders": folders,
+        "documents": documents,
+    })
+
+
 
 @login_required
-def documents_by_department(request):
+def documents_by_department(request, folder_id=None):
     if request.user.department:
         department = get_object_or_404(Department, id=request.user.department.id)
     else:
         messages.error(request, "у пользователя нет отдела.")
         return redirect('TD:folder_list')
+    if folder_id:
+        parent_folder = get_object_or_404(Folder, id=folder_id)
+        folders = parent_folder.subfolders.all()
+        documents = parent_folder.documents.all()
+    else:
+        parent_folder = None
+        folders = Folder.objects.filter(parent__isnull=True, documents__author__department=department, documents__status=TurnoverDocument.Status.PUBLISHED).distinct()
+        documents = TurnoverDocument.objects.filter(folder__isnull=True, author__department=department)
 
-    folders = Folder.objects.filter(documents__author__department=department,documents__status=TurnoverDocument.Status.PUBLISHED)
-    folder_docs = {
-        folder: folder.documents.filter(author__department=department)
-        for folder in folders
-    }
-    documents = TurnoverDocument.objects.filter(author__department=department, status=TurnoverDocument.Status.PUBLISHED, folder__isnull=True)
-    return render(request, 'blog/TD/documents_by_department.html', {
-        'folder_docs': folder_docs,
-        'uncategorized_documents': documents,
+    breadcrumbs = []
+    temp = parent_folder
+    while temp:
+        breadcrumbs.insert(0, temp)
+        temp = temp.parent
+
+    return render(request, "folders/folder_list.html", {
+        "parent_folder": parent_folder,
+        "breadcrumbs": breadcrumbs,
+        "folders": folders,
+        "documents": documents,
     })
+
+
 
 
 @login_required
