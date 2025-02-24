@@ -54,7 +54,7 @@ class TurnoverDocument(models.Model):
 
     publish_by = models.DateTimeField(default=timezone.now)
     document_type = models.ForeignKey(document_types, on_delete=models.CASCADE)
-    document_file = models.FileField(upload_to='blog/static/images/')
+    document_file = models.FileField(upload_to='blog/static/images/', null=True, blank=True)
     slug = models.SlugField(max_length=250, unique_for_date='publish_by')
     status = models.CharField(
         max_length=2,

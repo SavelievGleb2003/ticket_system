@@ -8,10 +8,20 @@
     </p>
   {% else %}
     <h1>Share "{{ Document.title }}" by e-mail</h1>
-    <form method="post">
-      {{ form.as_p }}
-      {% csrf_token %}
-        <input type="submit" value="Send e-mail">
-    </form>
+<!--    <form method="post">-->
+<!--      {{ form.as_p }}-->
+<!--      {% csrf_token %}-->
+<!--        <input type="submit" value="Send e-mail" class="btn btn-primary">-->
+<!--    </form>-->
+  <form method="post">
+    {% csrf_token %}
+      <div class="form-control">
+                {{ form.to }}
+      </div>
+      <div class="form-control">
+                {{ form.comments }}
+      </div>
+    <input type="submit" value="Send e-mail" class="btn btn-primary">
+  </form>
   {% endif %}
 {% endblock %}

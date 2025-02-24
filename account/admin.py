@@ -14,7 +14,7 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 
 @admin.register(Position)
-class DepartmentAdmin(admin.ModelAdmin):
+class PositionAdmin(admin.ModelAdmin):
     list_display = ['title', 'department','description', 'created_at', 'updated_at']
     list_filter = ['created_at', 'updated_at']
     search_fields = ['title', 'description']

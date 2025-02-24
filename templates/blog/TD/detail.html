@@ -1,39 +1,55 @@
 {% extends "blog/base.html" %}
 {% load static %}
+
 {% block title %}{{ single_document.title }}{% endblock %}
+
 {% block content %}
-  <h1>{{ single_document.title }}</h1>
-  <p class="date">
-    Published {{ single_document.publish_by }} by {{ single_document.auther }}
-  </p>
-  {{ single_document.description|linebreaks }}
-  <a href="{% static single_document.filename %}" target="_blank">
-      Open Image
-  </a>
-  {% if request.user.is_authenticated %}
-    <p>
-      <a href="{% url "TD:send_email" single_document.id %}">
-        Share this post
-      </a>
-    </p>
-  {% endif %}
-  {% with comments.count as total_comments %}
-    <h2>
-      {{ total_comments }} comment{{ total_comments|pluralize }}
-    </h2>
-  {% endwith %}
-  {% for comment in comments %}
-    <div class="comment">
-      <p class="info">
-        Comment {{ forloop.counter }} by {{ comment.name }}
-        {{ comment.created }}
-      </p>
-      {{ comment.description|linebreaks }}
+<div class="container mx-auto p-6">
+    <div class="card bg-base-100 shadow-xl border border-gray-200 p-6">
+        <h1 class="text-3xl font-bold mb-2">{{ single_document.title }}</h1>
+        <p class="text-gray-600">Published {{ single_document.publish_by }} by {{ single_document.auther }}</p>
+        <div class="mt-4 text-gray-800">{{ single_document.description|linebreaks }}</div>
+
+        {% if single_document.document_file %}
+            <div class="mt-4">
+                <h3 class="text-lg font-semibold">Screenshot:</h3>
+                <div class="border border-gray-300 rounded-lg overflow-hidden shadow-md max-w-xs">
+                    <img src="{{ single_document.document_file.url }}" alt="Ticket Screenshot" class="w-full h-auto">
+                    <div class="p-2 bg-gray-100 text-center">
+                        <a href="{{ single_document.document_file.url }}" target="_blank" class="link link-primary">View Full Image</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if request.user.is_authenticated %}
+        <div class="mt-4">
+            <a href="{% url 'TD:send_email' single_document.id %}" class="btn base-100">✉ Share this document</a>
+        </div>
+        {% endif %}
     </div>
-  {% empty %}
-    <p>There are no comments.</p>
-  {% endfor %}
-  {% if request.user.is_authenticated %}
-    {% include "blog/TD/includes/comment_form.html" %}
-  {% endif %}
+
+    <div class="mt-6 bg-base-200 p-6 rounded-xl shadow-md">
+        {% with comments.count as total_comments %}
+            <h2 class="text-xl font-semibold text-accent">{{ total_comments }} Comment{{ total_comments|pluralize }}</h2>
+        {% endwith %}
+
+        <div class="mt-4 space-y-4">
+            {% for comment in comments %}
+                <div class="p-4 bg-white shadow rounded-lg">
+                    <p class="text-sm text-gray-500">Comment {{ forloop.counter }} by <strong>{{ comment.name }}</strong> on {{ comment.created }}</p>
+                    <div class="text-gray-800">{{ comment.description|linebreaks }}</div>
+                </div>
+            {% empty %}
+                <p class="text-gray-500">There are no comments.</p>
+            {% endfor %}
+        </div>
+
+        {% if request.user.is_authenticated %}
+            <div class="mt-6">
+                {% include "blog/TD/includes/comment_form.html" %}
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

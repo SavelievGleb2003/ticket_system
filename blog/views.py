@@ -11,24 +11,32 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
 from .models import Folder, TurnoverDocument
 from account.models import Department
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+
 
 def folder_list(request, parent_id=None):
     if parent_id:
         parent_folder = get_object_or_404(Folder, id=parent_id)
         folders = parent_folder.subfolders.all()
         documents = parent_folder.documents.all()
+        # Generate the full URL for the parent folder
+        #parent_folder_url = request.build_absolute_uri(reverse('TD:folder_list'))
+        parent_folder_url = request.build_absolute_uri(
+            reverse('TD:folder_list') if parent_folder.parent is None else reverse('TD:folder_detail', args=[parent_folder.parent.id]))
+
     else:
         parent_folder = None
         folders = Folder.objects.filter(parent__isnull=True)  # Только корневые папки
         documents = TurnoverDocument.objects.filter(folder__isnull=True)  # Документы без папки
+        parent_folder_url = None
 
     return render(request, "folders/folder_list.html", {
         "parent_folder": parent_folder,
+        "parent_folder_url": parent_folder_url,  # Pass the full URL to the template
         "folders": folders,
         "documents": documents,
     })
-
-
 
 
 class ListTD(ListView):
