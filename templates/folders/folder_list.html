@@ -1,39 +1,49 @@
 {% extends 'blog/base.html' %}
 {% block content %}
 <div class="container mx-auto p-4">
-    <!-- Хлебные крошки -->
-    <div class="breadcrumbs text-sm mb-4">
-        <a href="{% url 'TD:folder_list' %}" class="btn btn-sm">📁 Главная</a>
-        {% for folder in breadcrumbs %}
-            / <a href="{% url 'TD:folder_detail' folder.id %}" class="btn btn-sm">{{ folder.name }}</a>
-        {% endfor %}
-    </div>
+    <h1 class="text-2xl font-bold mb-4">Управление папками и документами</h1>
 
-    <!-- Кнопка назад -->
-    {% if parent_folder and parent_folder.parent %}
-        <a href="{% url 'TD:folder_detail' parent_folder.parent.id %}" class="btn btn-outline mb-4">⬅ Назад</a>
-    {% endif %}
+    <!-- Кнопки добавления -->
+    <div class="mb-4">
+        <a href="{% url 'TD:folder_create' %}" class="btn btn-primary mr-2">➕ Создать папку</a>
+        <a href="{% url 'TD:document_create' %}" class="btn btn-success">📄 Добавить документ</a>
+    </div>
 
     <!-- Список папок -->
+    <h2 class="text-xl font-semibold mt-4">📁 Папки</h2>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {% for folder in folders %}
-        <a href="{% url 'TD:folder_detail' folder.id %}" class="card shadow-lg p-4 flex flex-col items-center text-center">
-            <div class="text-6xl">📂</div>
+        <div class="card bg-base-100 shadow-lg p-4 flex flex-col items-center text-center">
+            <a href="{% url 'TD:folder_detail' folder.id %}" class="text-6xl">📂</a>
             <div class="font-bold mt-2">{{ folder.name }}</div>
-        </a>
+            <div class="flex mt-2">
+                <a href="{% url 'TD:folder_update' folder.id %}" class="btn btn-warning btn-sm mr-2">✏ Редактировать</a>
+                <form action="{% url 'TD:folder_delete' folder.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-error btn-sm">🗑 Удалить</button>
+                </form>
+            </div>
+        </div>
         {% endfor %}
     </div>
 
-    <!-- Список файлов -->
-    <h2 class="mt-6 text-lg font-bold">Файлы</h2>
+    <!-- Список документов -->
+    <h2 class="text-xl font-semibold mt-6">📄 Документы</h2>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {% for document in documents %}
-       <a href="{{ document.get_absolute_url }}" class="card shadow-lg p-4 flex flex-col items-center text-center">
-            <div class="text-6xl">📄</div>
+        <div class="card bg-base-100 shadow-lg p-4 flex flex-col items-center text-center">
+            <a href="{{ document.get_absolute_url }}" class="text-6xl">📄</a>
             <div class="font-bold mt-2">{{ document.title }}</div>
-        </a>
+            <div class="flex mt-2">
+                <a href="{% url 'TD:document_update' document.id %}" class="btn btn-warning btn-sm mr-2">✏ Редактировать</a>
+                <form action="{% url 'TD:document_delete' document.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-error btn-sm">🗑 Удалить</button>
+                </form>
+            </div>
+        </div>
         {% empty %}
-        <p class="col-span-4 text-gray-500">Файлы отсутствуют</p>
+        <p class="col-span-4 text-gray-500">Документы отсутствуют</p>
         {% endfor %}
     </div>
 </div>

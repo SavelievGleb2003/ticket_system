@@ -11,6 +11,12 @@ urlpatterns = [
         re_path(
                 r'^TD/tag/(?P<tag_slug>[\w-]+)/$', views.ListTD.as_view(), name='TD_list_by_tag'
         ),
+        path('folders/create/', views.folder_create, name='folder_create'),
+        path('folders/<int:pk>/edit/', views.folder_update, name='folder_update'),
+        path('folders/<int:pk>/delete/', views.folder_delete, name='folder_delete'),
+        path('documents/create/', views.document_create, name='document_create'),
+        path('documents/<int:pk>/edit/', views.document_update, name='document_update'),
+        path('documents/<int:pk>/delete/', views.document_delete, name='document_delete'),
         path('<int:year>/<int:month>/<int:day>/<slug:TD>/', views.TD_detail, name='TD_detail'),
         path('<int:id_d>/share/',views.send_email, name='send_email'),
         path('<int:id_d>/comment/',views.add_comment, name='add_comment'),

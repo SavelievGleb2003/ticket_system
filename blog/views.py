@@ -60,9 +60,7 @@ class ListTD(ListView):
         context['tag'] = get_object_or_404(Tag, slug=tag_slug) if tag_slug else None
         return context
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import TurnoverDocument, Folder
+
 
 
 @login_required
@@ -190,3 +188,76 @@ def add_comment(request, id_d):
                   'blog/TD/Comment.html',{'document':document,'form':form, 'comment':comment})
 
 
+# create crud
+@login_required
+def folder_create(request):
+    if request.method == 'POST':
+        form = FolderForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('folder_list')
+    else:
+        form = FolderForm()
+    return render(request, 'folders/folder_form.html', {'form': form})
+
+@login_required
+def folder_update(request, pk):
+    folder = get_object_or_404(Folder, pk=pk)
+    if request.method == 'POST':
+        form = FolderForm(request.POST, instance=folder)
+        if form.is_valid():
+            form.save()
+            return redirect('folder_list')
+    else:
+        form = FolderForm(instance=folder)
+    return render(request, 'folders/folder_form.html', {'form': form})
+
+@login_required
+def folder_delete(request, pk):
+    folder = get_object_or_404(Folder, pk=pk)
+    if request.method == 'POST':
+        folder.delete()
+        return redirect('folder_list')
+    return render(request, 'folders/folder_confirm_delete.html', {'folder': folder})
+
+# Document Views
+
+@login_required
+def document_create(request):
+    if not request.user.department:
+        return HttpResponseForbidden("У вас нет отдела, создание документов запрещено.")
+
+    if request.method == 'POST':
+        form = TurnoverDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.author = request.user
+            document.save()
+            return redirect('document_list')
+    else:
+        form = TurnoverDocumentForm()
+    return render(request, 'documents/document_form.html', {'form': form})
+
+@login_required
+def document_update(request, pk):
+    document = get_object_or_404(TurnoverDocument, pk=pk)
+    if document.author.department != request.user.department:
+        return HttpResponseForbidden("Вы можете редактировать только документы своего отдела.")
+    if request.method == 'POST':
+        form = TurnoverDocumentForm(request.POST, request.FILES, instance=document)
+        if form.is_valid():
+            form.save()
+            return redirect('document_list')
+    else:
+        form = TurnoverDocumentForm(instance=document)
+    return render(request, 'documents/document_form.html', {'form': form})
+
+@login_required
+def document_delete(request, pk):
+    document = get_object_or_404(TurnoverDocument, pk=pk)
+    if document.author.department != request.user.department:
+        return HttpResponseForbidden("Вы можете удалять только документы своего отдела.")
+    if request.method == 'POST':
+        document.delete()
+        return redirect('document_list')
+    return render(request, 'documents/document_confirm_delete.html', {'document': document})
