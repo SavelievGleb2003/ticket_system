@@ -22,8 +22,8 @@ class Ticket(models.Model):
     position = models.ForeignKey(Position, on_delete=models.CASCADE, related_name='tickets', null=True, blank=True)
 
 
-    screenshot = models.ImageField(upload_to='tickets/static/ticket_image/', null=True, blank=True)
-    due_date = models.DateField(null=True, blank=True)
+    screenshot = models.ImageField(upload_to='tickets/screenshots', null=True, blank=True)
+    #due_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

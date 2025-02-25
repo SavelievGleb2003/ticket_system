@@ -9,14 +9,20 @@
         <div class="card bg-base-100 shadow-xl border border-gray-200">
             <div class="card-body">
                 <h3 class="card-title text-xl font-semibold">{{ ticket.title }}</h3>
-                <p class="text-gray-500">Status:
+                <p class="text-gray-500">Статус:
                     <span class="badge
                         {% if ticket.status == 'open' %}badge-error
                         {% elif ticket.status == 'in_progress' %}badge-warning
                         {% else %}badge-success
                         {% endif %}">
-                        {{ ticket.status }}</span>
+                        {% if ticket.status == 'open' %}Открыт
+                        {% elif ticket.status == 'in_progress' %}В процессе
+                        {% else %}Закрыт
+                        {% endif %}
+                    </span>
                 </p>
+
+
                 <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-secondary mt-2">View Details</a>
             </div>
         </div>

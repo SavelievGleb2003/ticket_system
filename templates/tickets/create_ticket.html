@@ -7,42 +7,42 @@
             {% csrf_token %}
             <div class="form-control">
                 <label class="label">
-                    <span class="label-text">Title</span>
+                    <span class="label-text">Заголовок</span>
                 </label>
                 {{ form.title }}
             </div>
             <div class="form-control">
                 <label class="label">
-                    <span class="label-text">Description</span>
+                    <span class="label-text">Описание</span>
                 </label>
                 {{ form.description }}
             </div>
             <div class="form-control">
                 <label class="label">
-                    <span class="label-text">Department</span>
+                    <span class="label-text">Отдел</span>
                 </label>
                 {{ form.department }}
             </div>
             <div class="form-control">
                 <label class="label">
-                    <span class="label-text">Position</span>
+                    <span class="label-text">Должность</span>
                 </label>
                 {{ form.position }}
             </div>
+<!--            <div class="form-control">-->
+<!--                <label class="label">-->
+<!--                    <span class="label-text">Due Date</span>-->
+<!--                </label>-->
+<!--                {{ form.due_date }}-->
+<!--            </div>-->
             <div class="form-control">
                 <label class="label">
-                    <span class="label-text">Due Date</span>
-                </label>
-                {{ form.due_date }}
-            </div>
-            <div class="form-control">
-                <label class="label">
-                    <span class="label-text">Attach Screenshot</span>
+                    <span class="label-text">Прикрепить снимок экрана</span>
                 </label>
                 {{ form.screenshot }}
             </div>
             <div class="flex justify-center">
-                <button type="submit" class="btn btn-primary w-full">Submit</button>
+                <button type="submit" class="btn btn-primary w-full">Отправить</button>
             </div>
         </form>
     </div>

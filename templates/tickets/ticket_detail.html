@@ -6,22 +6,51 @@
         <p class="text-gray-600">{{ ticket.description }}</p>
         
         <div class="mt-4">
-            <p><strong>Status:</strong> 
-                <span class="badge 
-                    {% if ticket.status == 'open' %}badge-error
-                    {% elif ticket.status == 'in_progress' %}badge-warning
-                    {% else %}badge-success
-                    {% endif %}">
-                    {{ ticket.status }}
-                </span>
+            <p>Статус:
+                    <span class="badge
+                        {% if ticket.status == 'open' %}badge-error
+                        {% elif ticket.status == 'in_progress' %}badge-warning
+                        {% else %}badge-success
+                        {% endif %}">
+                        {% if ticket.status == 'open' %}Открыт
+                        {% elif ticket.status == 'in_progress' %}В процессе
+                        {% else %}Закрыт
+                        {% endif %}
+                    </span>
+                </p>
+            <p>
+                <strong>Задача была создана:</strong>
+                {% if ticket.created_by.first_name and ticket.created_by.last_name and ticket.created_by.position%}
+                    {{ ticket.created_by.first_name }}
+                    {{ ticket.created_by.last_name }}
+                    {{ ticket.created_by.position }}
+                {% else %}
+                    {{ ticket.created_by.username }}
+                    {{ ticket.created_by.position }}
+                {% endif %}
+
             </p>
-            <p><strong>Created by:</strong> {{ ticket.created_by.username }}</p>
-            <p><strong>Accepted by:</strong> {{ ticket.accepted_by.username|default:"Not Assigned" }}</p>
+
+            <p><strong>задача была принята:</strong>
+                {% if ticket.accepted_by %}
+                    {% if ticket.accepted_by.first_name and ticket.created_by.last_name and ticket.accepted_by.position%}
+                        {{ ticket.accepted_by.first_name }}
+                        {{ ticket.accepted_by.last_name }}
+                        {{ ticket.accepted_by.position }}
+                    {% else %}
+                        {{ ticket.accepted_by.username }}
+                        {{ ticket.accepted_by.position }}
+                    {% endif %}
+                {% else %}
+                {{ ticket.accepted_by.username|default:"На данный момент не принята" }}
+                {% endif %}
+
+            </p>
         </div>
 
         {% if ticket.screenshot %}
             <div class="mt-4">
-                <h3 class="text-lg font-semibold">Screenshot:</h3>
+                <h3 class="text-lg font-semibold">Прикрепленный снимок экрана:</h3>
                 <div class="border border-gray-300 rounded-lg overflow-hidden shadow-md max-w-xs">
                     <img src="{{ ticket.screenshot.url }}" alt="Ticket Screenshot" class="w-full h-auto">
                     <div class="p-2 bg-gray-100 text-center">
@@ -39,11 +68,13 @@
                     <button type="submit" class="btn btn-warning">Accept Ticket</button>
                 </form>
                 {% else %}
-                    <p class="text-gray-500">you don't have access rights to accept ticket.</p>
+                    <!--<p class="text-gray-500">you don't have access rights to accept ticket.</p>-->
                 {% endif %}
             {% elif ticket.status == 'in_progress' %}
-                <a href="{% url 'chat:chat_detail' ticket.id %}" class="btn btn-info">Go to Chat</a>
-                {% if ticket.department == request.user.department and ticket.position == request.user.position %}
+                {% if ticket.accepted_by == request.user or  ticket.created_by == request.user %}
+                    <a href="{% url 'chat:chat_detail' ticket.id %}" class="btn btn-info">Go to Chat</a>
+                {% endif %}
+                {% if ticket.department == request.user.department and ticket.position == request.user.position and ticket.accepted_by == request.user %}
                 <form action="{% url 'tickets:close_ticket' ticket.id %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-success">Close Ticket</button>

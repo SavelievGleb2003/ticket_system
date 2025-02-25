@@ -10,16 +10,13 @@
 <body class="bg-gray-100">
     <nav class="navbar bg-base-200 shadow-lg p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="http://127.0.0.1:8000/TD/" class="text-2xl font-bold">ЮЖК</a>
+            <a href="http://127.0.0.1:8000/tickets/" class="text-2xl font-bold">ЮЖК</a>
             {% if request.user.is_authenticated %}
             <div class="hidden md:flex space-x-4">
                 <a href="{% url 'account:dashboard' %}" class="btn btn-ghost">Dashboard</a>
-                <a href="{% url 'tickets:ticket_list' %}" class="btn btn-ghost">Tickets</a>
-                <a href="{% url 'TD:user_documents_and_folders' %}" class="btn btn-ghost">My Documents</a>
-                <a href="{% url 'TD:documents_by_department' %}" class="btn btn-ghost">Department Docs</a>
-                <a href="{% url 'tickets:ticket_list_created_by' %}" class="btn btn-ghost">My Tickets</a>
-                <a href="{% url 'tickets:ticket_list_accepted_by' %}" class="btn btn-ghost">In Work</a>
-                <a href="#" class="btn btn-ghost">People</a>
+                <a href="{% url 'tickets:ticket_list' %}" class="btn btn-ghost">Задания</a>
+                <a href="{% url 'tickets:ticket_list_created_by' %}" class="btn btn-ghost">Мною создание задания</a>
+                <a href="{% url 'tickets:ticket_list_accepted_by' %}" class="btn btn-ghost">В работе</a>
             </div>
             <div class="dropdown dropdown-end md:hidden">
                 <label tabindex="0" class="btn btn-square btn-ghost">
@@ -27,12 +24,9 @@
                 </label>
                 <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-52">
                     <li><a href="{% url 'account:dashboard' %}">Dashboard</a></li>
-                    <li><a href="{% url 'tickets:ticket_list' %}">Tickets</a></li>
-                    <li><a href="{% url 'TD:user_documents_and_folders' %}">My Documents</a></li>
-                    <li><a href="{% url 'TD:documents_by_department' %}">Department Docs</a></li>
-                    <li><a href="{% url 'tickets:ticket_list_created_by' %}">My Tickets</a></li>
-                    <li><a href="{% url 'tickets:ticket_list_accepted_by' %}">In Work</a></li>
-                    <li><a href="#">People</a></li>
+                    <li><a href="{% url 'tickets:ticket_list' %}">Задания</a></li>
+                    <li><a href="{% url 'tickets:ticket_list_created_by' %}">Мною создание задания</a></li>
+                    <li><a href="{% url 'tickets:ticket_list_accepted_by' %}">В работе</a></li>
                 </ul>
             </div>
             <div class="flex items-center space-x-2">

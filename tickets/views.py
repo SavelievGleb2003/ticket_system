@@ -105,7 +105,7 @@ def close_ticket(request, ticket_id):
         messages.error(request, "Эту задачу невозможно завершить, поскольку она либо не была принята в работу, либо уже завершена.")
         return redirect('tickets:ticket_list')
 
-    if ticket.department != request.user.department or ticket.position != request.user.position:
+    if ticket.department != request.user.department or ticket.position != request.user.position or ticket.accepted_by != request.user:
         messages.error(request, "У вас нет прав на завершения этой задачи.")
         raise PermissionDenied("Вы не можете завершеть эту задачу.")
 

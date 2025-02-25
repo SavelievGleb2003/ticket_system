@@ -1,8 +1,0 @@
-<h2>Add a new comment</h2>
-<form action="{% url "TD:add_comment" single_document.id %}" method="post">
-  {% csrf_token %}
-    <div class="form-control">
-                {{ form.description.as_field_group }}
-    </div>
-  <p><input type="submit" value="Add comment" class="btn btn-primary"></p>
-</form>

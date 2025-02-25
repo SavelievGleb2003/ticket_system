@@ -58,8 +58,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'taggit',
-    'blog.apps.BlogConfig',
     'tickets.apps.TicketsConfig',
     'chat.apps.ChatConfig',
     'tailwind',
