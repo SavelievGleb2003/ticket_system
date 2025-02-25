@@ -20,10 +20,14 @@ def folder_list(request, folder_id=None):
         parent_folder = get_object_or_404(Folder, id=folder_id)
         folders = parent_folder.subfolders.all()
         documents = parent_folder.documents.all()
+        parent_folder_url = request.build_absolute_uri(reverse('TD:folder_list')
+                                                       if parent_folder.parent is None else
+                                                       reverse('TD:folder_detail', args=[parent_folder.parent.id]))
     else:
         parent_folder = None
         folders = Folder.objects.filter(parent__isnull=True)
         documents = TurnoverDocument.objects.filter(folder__isnull=True)
+        parent_folder_url = None
 
     breadcrumbs = []
     temp = parent_folder
