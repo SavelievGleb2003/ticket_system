@@ -5,7 +5,7 @@
 
     <!-- Кнопки добавления -->
     <div class="mb-4">
-        <a href="{% url 'TD:folder_create' %}" class="btn btn-primary mr-2">➕ Создать папку</a>
+        <button class="btn btn-primary mr-2" onclick="openModal()" >➕ Создать папку</button>
         <a href="{% url 'TD:document_create' %}" class="btn btn-success">📄 Добавить документ</a>
     </div>
 
@@ -18,6 +18,47 @@
                 {{ ancestor.name }}
             </a> /
         {% endfor %}
+
+
+        <!-- Modal -->
+    <div id="folderModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+        <div class="bg-base-200 p-6 rounded-2xl shadow-2xl w-96">
+            <h2 class="text-xl font-bold mb-4 text-center">Создать папку</h2>
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-sm font-medium mb-1">Название папки:</label>
+                    <input type="text" name="name" class="input input-bordered w-full bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" {{ form.title }}>
+
+                </div>
+
+                <input type="hidden" name="parent" value="{{ parent_folder.id }}">
+
+                <div class="flex justify-between mt-4">
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn bg-blue-600 text-white hover:bg-blue-700">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+
+   <script>
+        function openModal() {
+            document.getElementById("folderModal").classList.remove("hidden");
+            document.body.classList.add("overflow-hidden");  // Prevents background scrolling
+        }
+
+        function closeModal() {
+            document.getElementById("folderModal").classList.add("hidden");
+            document.body.classList.remove("overflow-hidden");
+        }
+    </script>
+
+
+
 
     {% endif %}
     </h1>

@@ -1,11 +1,12 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import  redirect
 from .models import TurnoverDocument
 from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
 from django.views.generic import ListView
-from .forms import CommentForm, EmailTD_form
+from .forms import CommentForm, EmailTD_form, FolderForm
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from taggit.models import Tag
+from django.http import JsonResponse
 from django.contrib import messages
 
 from django.shortcuts import render, get_object_or_404
@@ -20,14 +21,11 @@ def folder_list(request, folder_id=None):
         parent_folder = get_object_or_404(Folder, id=folder_id)
         folders = parent_folder.subfolders.all()
         documents = parent_folder.documents.all()
-        parent_folder_url = request.build_absolute_uri(reverse('TD:folder_list')
-                                                       if parent_folder.parent is None else
-                                                       reverse('TD:folder_detail', args=[parent_folder.parent.id]))
     else:
         parent_folder = None
         folders = Folder.objects.filter(parent__isnull=True)
         documents = TurnoverDocument.objects.filter(folder__isnull=True)
-        parent_folder_url = None
+
 
     breadcrumbs = []
     temp = parent_folder
@@ -192,17 +190,29 @@ def add_comment(request, id_d):
                   'blog/TD/Comment.html',{'document':document,'form':form, 'comment':comment})
 
 
-# create crud
 @login_required
-def folder_create(request):
-    if request.method == 'POST':
-        form = FolderForm(request.POST)
+def create_folder(request, parent_id=None):
+    parent_folder = None
+    if parent_id:
+        parent_folder = get_object_or_404(Folder, id=parent_id)
+
+    if request.method == "POST":
+        form = FolderForm(request.POST, parent_folder=parent_folder)
         if form.is_valid():
-            form.save()
-            return redirect('folder_list')
+            folder = form.save(commit=False)
+            folder.parent = parent_folder
+            folder.save()
+            if request.headers.get('HX-Request'):  # HTMX AJAX request
+                return JsonResponse({"success": True, "folder_name": folder.name})
+            return redirect("folder_list")
+        else:
+            if request.headers.get('HX-Request'):  # Return errors in JSON
+                return JsonResponse({"success": False, "errors": form.errors}, status=400)
+
     else:
-        form = FolderForm()
-    return render(request, 'folders/folder_form.html', {'form': form})
+        form = FolderForm(parent_folder=parent_folder)
+
+    return render(request, "create_folder.html", {"form": form, "parent_folder": parent_folder})
 
 @login_required
 def folder_update(request, pk):
