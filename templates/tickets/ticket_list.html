@@ -1,14 +1,17 @@
 {% extends "blog/base.html" %}
 {% block content1 %}
+
+
 <div class="container mx-auto p-6">
-    <h2 class="text-3xl font-bold mb-4">Tickets</h2>
-    <a href="{% url 'tickets:create_ticket' %}" class="btn btn-primary mb-4">Create Ticket</a>
+    <h2 class="text-3xl font-bold mb-4">Задачи</h2>
+    <a href="{% url 'tickets:create_ticket' %}" class="btn btn-primary mb-4">Создать задачу</a>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for ticket in tickets %}
         <div class="card bg-base-100 shadow-xl border border-gray-200">
             <div class="card-body">
                 <h3 class="card-title text-xl font-semibold">{{ ticket.title }}</h3>
+
                 <p class="text-gray-500">Статус:
                     <span class="badge
                         {% if ticket.status == 'open' %}badge-error
@@ -21,9 +24,20 @@
                         {% endif %}
                     </span>
                 </p>
+                <p class="text-gray-500">Создал:
+                    {{ ticket.created_by.username }} в {{ ticket.created_at|date:"H:i" }}
+                </p>
+                <p class="text-gray-500">Принял:
+                    {% if ticket.accepted_by %}
+                        {{ ticket.accepted_by.username }} в {{ ticket.accepted_at|date:"H:i" }}
+                    {% else %}
+                        {{ ticket.accepted_by.username|default:"На данный момент не принята" }}
+                    {% endif %}
+                </p>
 
 
-                <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-secondary mt-2">View Details</a>
+
+                <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-secondary mt-2">Посмотреть детали</a>
             </div>
         </div>
         {% endfor %}

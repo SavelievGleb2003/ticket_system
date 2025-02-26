@@ -4,16 +4,36 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    {% tailwind_css %}
 
+    {% tailwind_css %}
+    <title>Theme Toggle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function toggleTheme() {
+            const htmlElement = document.documentElement;
+            const currentTheme = htmlElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "light" ? "dark" : "light";
+            htmlElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme); // Save theme
+
+            // Toggle icon animation
+            document.getElementById("theme-icon").classList.toggle("rotate-[360deg]");
+        }
+
+        // Load saved theme on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedTheme = localStorage.getItem("theme") || "light";
+            document.documentElement.setAttribute("data-theme", savedTheme);
+        });
+    </script>
 </head>
 <body class="bg-gray-100">
     <nav class="navbar bg-base-200 shadow-lg p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="http://127.0.0.1:8000/tickets/" class="text-2xl font-bold">ЮЖК</a>
+            <a href="http://127.0.0.1:8000/tickets/ticket_list_created_by" class="text-2xl font-bold">ЮЖК</a>
             {% if request.user.is_authenticated %}
             <div class="hidden md:flex space-x-4">
-                <a href="{% url 'account:dashboard' %}" class="btn btn-ghost">Dashboard</a>
+<!--                <a href="{% url 'account:dashboard' %}" class="btn btn-ghost">Dashboard</a>-->
                 <a href="{% url 'tickets:ticket_list' %}" class="btn btn-ghost">Задания</a>
                 <a href="{% url 'tickets:ticket_list_created_by' %}" class="btn btn-ghost">Мною создание задания</a>
                 <a href="{% url 'tickets:ticket_list_accepted_by' %}" class="btn btn-ghost">В работе</a>
@@ -23,21 +43,44 @@
                     ☰
                 </label>
                 <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-52">
-                    <li><a href="{% url 'account:dashboard' %}">Dashboard</a></li>
+<!--                    <li><a href="{% url 'account:dashboard' %}">Dashboard</a></li>-->
                     <li><a href="{% url 'tickets:ticket_list' %}">Задания</a></li>
                     <li><a href="{% url 'tickets:ticket_list_created_by' %}">Мною создание задания</a></li>
                     <li><a href="{% url 'tickets:ticket_list_accepted_by' %}">В работе</a></li>
                 </ul>
             </div>
+            <button onclick="toggleTheme()" class="btn btn-circle bg-base-100 shadow-xl transition-all">
+                <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 transition-transform duration-500 ease-in-out"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Sun Icon (Day Mode) -->
+                    <g id="sun" class="sun transition-all duration-500 ease-in-out">
+                        <circle cx="12" cy="12" r="5" />
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </g>
+
+                <!-- Moon Icon (Night Mode) -->
+                <path id="moon" class="hidden transition-all duration-500 ease-in-out"
+                      d="M21 12.79A9 9 0 0111.21 3 7 7 0 1021 12.79z" />
+                </svg>
+            </button>
+
+
             <div class="flex items-center space-x-2">
-                <span class="text-lg">Hello, {{ request.user.first_name|default:request.user.username }}</span>
+                <span class="text-lg">Здравствуйте, {{ request.user.first_name|default:request.user.username }}</span>
                 <form action="{% url 'account:logout' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-error">Logout</button>
+                    <button type="submit" class="btn btn-error">Выход</button>
                 </form>
             </div>
             {% else %}
-            <a href="{% url 'account:login' %}" class="btn btn-primary">Log-in</a>
+            <a href="{% url 'account:login' %}" class="btn btn-primary">Вход</a>
             {% endif %}
         </div>
     </nav>
@@ -63,11 +106,174 @@
     </div>
 
     <script>
+        // Add this JavaScript code to your static JS files or include it in your template
+// For example, create a file named ticket_ajax.js
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // Get the form for creating a ticket
+    const ticketForm = document.getElementById('ticket-form');
+
+    if (ticketForm) {
+        ticketForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Create FormData object from the form
+            const formData = new FormData(ticketForm);
+
+            // Send AJAX request to create ticket
+            fetch('{% url "tickets:create_ticket" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear the form
+                    ticketForm.reset();
+
+                    // Update the ticket list
+                    refreshTicketList();
+
+                    // Show success message
+                    showMessage('Задача успешно создана!', 'success');
+                } else {
+                    // Show error message
+                    showMessage('Ошибка при создании задачи: ' + data.errors, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Произошла ошибка при отправке формы', 'error');
+            });
+        });
+    }
+
+    // Function to refresh the ticket list
+    function refreshTicketList() {
+        const ticketListContainer = document.getElementById('ticket-list-container');
+
+        if (ticketListContainer) {
+            fetch('{% url "tickets:get_tickets_json" %}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.tickets) {
+                        updateTicketList(data.tickets);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching tickets:', error);
+                });
+        }
+    }
+
+    // Function to update the ticket list in the DOM
+    function updateTicketList(tickets) {
+        const ticketListContainer = document.getElementById('ticket-list-container');
+
+        if (ticketListContainer) {
+            // Clear current content
+            ticketListContainer.innerHTML = '';
+
+            // Create ticket cards
+            tickets.forEach(ticket => {
+                const ticketCard = createTicketCard(ticket);
+                ticketListContainer.appendChild(ticketCard);
+            });
+        }
+    }
+
+    // Function to create a ticket card element
+    function createTicketCard(ticket) {
+        const card = document.createElement('div');
+        card.className = 'card bg-base-100 shadow-xl border border-gray-200';
+
+        let statusBadgeClass = '';
+        let statusText = '';
+
+        if (ticket.status === 'open') {
+            statusBadgeClass = 'badge-error';
+            statusText = 'Открыт';
+        } else if (ticket.status === 'in_progress') {
+            statusBadgeClass = 'badge-warning';
+            statusText = 'В процессе';
+        } else {
+            statusBadgeClass = 'badge-success';
+            statusText = 'Закрыт';
+        }
+
+        card.innerHTML = `
+            <div class="card-body">
+                <h3 class="card-title text-xl font-semibold">${ticket.title}</h3>
+                <p class="text-gray-500">Статус:
+                    <span class="badge ${statusBadgeClass}">${statusText}</span>
+                </p>
+                <p class="text-gray-500">Создал:
+                    ${ticket.created_by} в ${ticket.created_at}
+                </p>
+                <p class="text-gray-500">Принял:
+                    ${ticket.accepted_by ? ticket.accepted_by + ' в ' + ticket.accepted_at : 'На данный момент не принята'}
+                </p>
+                <a href="/tickets/${ticket.id}/" class="btn btn-secondary mt-2">Посмотреть детали</a>
+            </div>
+        `;
+
+        return card;
+    }
+
+    // Function to show messages
+    function showMessage(message, type) {
+        const messageContainer = document.getElementById('message-container');
+
+        if (messageContainer) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'} mb-4`;
+            alertDiv.textContent = message;
+
+            messageContainer.appendChild(alertDiv);
+
+            // Remove message after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        }
+    });
         document.addEventListener("DOMContentLoaded", function () {
             setTimeout(() => {
                 document.querySelectorAll(".alert").forEach(el => el.remove());
             }, 3000);
         });
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedTheme = localStorage.getItem("theme") || "light";
+            document.documentElement.setAttribute("data-theme", savedTheme);
+            updateIcon(savedTheme);
+        });
+
+        function toggleTheme() {
+            const htmlElement = document.documentElement;
+            const currentTheme = htmlElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "light" ? "dark" : "light";
+            htmlElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme);
+            updateIcon(newTheme);
+        }
+
+        function updateIcon(theme) {
+            const sunIcon = document.getElementById("sun");
+            const moonIcon = document.getElementById("moon");
+
+            if (theme === "dark") {
+                sunIcon.classList.add("hidden");
+                moonIcon.classList.remove("hidden");
+            } else {
+                sunIcon.classList.remove("hidden");
+                moonIcon.classList.add("hidden");
+            }
+        }
     </script>
 </body>
 </html>

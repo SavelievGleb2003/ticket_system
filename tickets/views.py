@@ -6,6 +6,8 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from .models import Ticket
 from .forms import TicketForm
+from django.http import JsonResponse
+from django.utils import timezone
 
 @login_required
 def ticket_list(request):
@@ -52,6 +54,7 @@ def ticket_list_accepted_by(request):
 @login_required
 def ticket_detail(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+
     return render(request, 'tickets/ticket_detail.html', {'ticket': ticket})
 
 @login_required
@@ -83,6 +86,7 @@ def accept_ticket(request, ticket_id):
 
     # Назначаем задачу текущему пользователю и обновляем статус
     ticket.accepted_by = request.user
+    ticket.accepted_at = timezone.now()
     ticket.status = 'in_progress'
     ticket.save()
 

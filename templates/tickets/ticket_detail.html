@@ -1,5 +1,6 @@
 {% extends "blog/base.html" %}
 {% block content2 %}
+{% load l10n %}
 <div class="container mx-auto p-6">
     <div class="card bg-base-100 shadow-xl border border-gray-200 p-6">
         <h2 class="text-3xl font-bold mb-2">{{ ticket.title }}</h2>
@@ -27,9 +28,8 @@
                 {% else %}
                     {{ ticket.created_by.username }}
                     {{ ticket.created_by.position }}
-                {% endif %}
-
-            </p>
+                {% endif %} в
+                {{ ticket.created_at }}
 
             <p><strong>задача была принята:</strong>
                 {% if ticket.accepted_by %}
@@ -43,8 +43,8 @@
                     {% endif %}
                 {% else %}
                 {{ ticket.accepted_by.username|default:"На данный момент не принята" }}
-                {% endif %}
-
+                {% endif %} в
+                {{ ticket.accepted_at }}
             </p>
         </div>
 

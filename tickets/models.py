@@ -25,6 +25,7 @@ class Ticket(models.Model):
     screenshot = models.ImageField(upload_to='tickets/screenshots', null=True, blank=True)
     #due_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
