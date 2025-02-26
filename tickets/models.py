@@ -1,8 +1,9 @@
 from django.db import models
 import os
-# Create your models here.
-
-from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from account.models import CustomUser, Department, Position
 
 
@@ -17,13 +18,13 @@ class Ticket(models.Model):
     description = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='tickets_created')
-    accepted_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='tickets_accepted', null=True, blank=True)
+    accepted_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='tickets_accepted', null=True,
+                                    blank=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='tickets', null=True, blank=True)
     position = models.ForeignKey(Position, on_delete=models.CASCADE, related_name='tickets', null=True, blank=True)
 
-
     screenshot = models.ImageField(upload_to='tickets/screenshots', null=True, blank=True)
-    #due_date = models.DateField(null=True, blank=True)
+    # due_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     accepted_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -34,5 +35,86 @@ class Ticket(models.Model):
         position_info = self.position.title if self.position else "No Position"
         return f"{self.title} - {department_info} ({position_info}) - {self.status} - {assigned_info}"
 
+    def to_dict(self):
+        """Преобразует объект тикета в словарь для передачи через WebSocket"""
+        return {
+            'id': self.id,
+            'title': self.title,
+            'status': self.status,
+            'status_display': self.get_status_display(),
+            'created_by': self.created_by.username,
+            'created_at': self.created_at.strftime('%H:%M'),
+            'accepted_by': self.accepted_by.username if self.accepted_by else None,
+            'accepted_at': self.accepted_at.strftime('%H:%M') if self.accepted_at else None,
+            'department': self.department.name if self.department else None,
+            'position': self.position.title if self.position else None,
+        }
 
 
+@receiver(post_save, sender=Ticket)
+def ticket_post_save(sender, instance, created, **kwargs):
+    """Отправляет уведомления при создании или обновлении тикета"""
+    channel_layer = get_channel_layer()
+    ticket_data = instance.to_dict()
+
+    # Если это новый тикет
+    if created:
+        # Отправляем уведомление всем пользователям с тем же департаментом и должностью
+        if instance.department and instance.position:
+            async_to_sync(channel_layer.group_send)(
+                f"department_{instance.department.id}_{instance.position.id}",
+                {
+                    "type": "ticket_created",
+                    "ticket": ticket_data
+                }
+            )
+
+        # Отправляем создателю
+        async_to_sync(channel_layer.group_send)(
+            f"user_{instance.created_by.id}",
+            {
+                "type": "ticket_created",
+                "ticket": ticket_data
+            }
+        )
+
+    # Если тикет был принят в работу
+    elif instance.status == 'in_progress' and instance.accepted_by:
+        # Уведомление создателю
+        async_to_sync(channel_layer.group_send)(
+            f"user_{instance.created_by.id}",
+            {
+                "type": "ticket_accepted",
+                "ticket": ticket_data
+            }
+        )
+
+        # Уведомление принявшему
+        async_to_sync(channel_layer.group_send)(
+            f"accepted_{instance.accepted_by.id}",
+            {
+                "type": "ticket_accepted",
+                "ticket": ticket_data
+            }
+        )
+
+    # Если тикет был закрыт
+    elif instance.status == 'closed':
+        # Уведомление создателю
+        async_to_sync(channel_layer.group_send)(
+            f"user_{instance.created_by.id}",
+            {
+                "type": "ticket_closed",
+                "ticket": ticket_data
+            }
+        )
+
+        # Уведомление принявшему
+        if instance.accepted_by:
+            async_to_sync(channel_layer.group_send)(
+                f"accepted_{instance.accepted_by.id}",
+                {
+                    "type": "ticket_closed",
+                    "ticket": ticket_data
+                }
+            )

@@ -6,7 +6,6 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from .models import Ticket
 from .forms import TicketForm
-from django.http import JsonResponse
 from django.utils import timezone
 
 @login_required

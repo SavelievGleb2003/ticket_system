@@ -1,14 +1,13 @@
 {% extends "blog/base.html" %}
 {% block content1 %}
 
-
 <div class="container mx-auto p-6">
     <h2 class="text-3xl font-bold mb-4">Задачи</h2>
     <a href="{% url 'tickets:create_ticket' %}" class="btn btn-primary mb-4">Создать задачу</a>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for ticket in tickets %}
-        <div class="card bg-base-100 shadow-xl border border-gray-200">
+        <div class="card bg-base-100 shadow-xl border border-gray-200" data-ticket-id="{{ ticket.id }}">
             <div class="card-body">
                 <h3 class="card-title text-xl font-semibold">{{ ticket.title }}</h3>
 
@@ -35,24 +34,161 @@
                     {% endif %}
                 </p>
 
-
-
                 <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-secondary mt-2">Посмотреть детали</a>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
-{% endblock %}
 
-<!--
-{% block content3 %}
-<h2>Tickets</h2>
-<a href="{% url 'tickets:create_ticket' %}">Create Ticket</a>
-<ul>
-    {% for ticket in tickets %}
-        <li><a href="{% url 'tickets:ticket_detail' ticket.id %}">{{ ticket.title }}</a> - {{ ticket.status }}</li>
-    {% endfor %}
-</ul>
-<button class="btn btn-success">click me!</button>
-{% endblock %}-->
+<!-- Встроенный JavaScript для WebSocket -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем, что мы на странице со списком тикетов
+    const ticketListContainer = document.querySelector('.grid');
+    if (!ticketListContainer) return;
+
+    // Инициализируем WebSocket
+    const ticketSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/tickets/'
+    );
+
+    ticketSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        console.log('Получено уведомление:', data);
+
+        // Обрабатываем полученное событие
+        switch(data.type) {
+            case 'ticket_created':
+                handleNewTicket(data.ticket);
+                showNotification('Новая задача', `${data.ticket.title} создана ${data.ticket.created_by}`);
+                break;
+            case 'ticket_accepted':
+                updateTicket(data.ticket);
+                showNotification('Задача принята', `${data.ticket.title} принята ${data.ticket.accepted_by}`);
+                break;
+            case 'ticket_closed':
+                updateTicket(data.ticket);
+                showNotification('Задача закрыта', `${data.ticket.title} завершена`);
+                break;
+        }
+    };
+
+    ticketSocket.onclose = function(e) {
+        console.error('Соединение с сервером тикетов закрыто');
+    };
+
+    // Добавляет новый тикет в список
+    function handleNewTicket(ticket) {
+        // Проверяем, не существует ли уже этот тикет в списке
+        const existingTicket = document.querySelector(`[data-ticket-id="${ticket.id}"]`);
+        if (existingTicket) {
+            updateTicket(ticket);
+            return;
+        }
+
+        // Создаем элемент для нового тикета
+        const ticketElement = createTicketElement(ticket);
+        ticketListContainer.prepend(ticketElement);
+    }
+
+    // Обновляет существующий тикет
+    function updateTicket(ticket) {
+        const existingTicket = document.querySelector(`[data-ticket-id="${ticket.id}"]`);
+        if (!existingTicket) return;
+
+        // Обновляем статус
+        const statusBadge = existingTicket.querySelector('.badge');
+        if (statusBadge) {
+            // Удаляем существующие классы статуса
+            statusBadge.classList.remove('badge-error', 'badge-warning', 'badge-success');
+
+            // Добавляем новый класс в зависимости от статуса
+            if (ticket.status === 'open') {
+                statusBadge.classList.add('badge-error');
+                statusBadge.textContent = 'Открыт';
+            } else if (ticket.status === 'in_progress') {
+                statusBadge.classList.add('badge-warning');
+                statusBadge.textContent = 'В процессе';
+            } else {
+                statusBadge.classList.add('badge-success');
+                statusBadge.textContent = 'Закрыт';
+            }
+        }
+
+        // Обновляем информацию о принявшем
+        const acceptedByElement = existingTicket.querySelector('p:nth-of-type(3)');
+        if (acceptedByElement) {
+            if (ticket.accepted_by) {
+                acceptedByElement.textContent = `Принял: ${ticket.accepted_by} в ${ticket.accepted_at}`;
+            } else {
+                acceptedByElement.textContent = 'Принял: На данный момент не принята';
+            }
+        }
+    }
+
+    // Создает элемент тикета
+    function createTicketElement(ticket) {
+        const ticketDiv = document.createElement('div');
+        ticketDiv.className = 'card bg-base-100 shadow-xl border border-gray-200';
+        ticketDiv.setAttribute('data-ticket-id', ticket.id);
+
+        // Определяем класс для бейджа в зависимости от статуса
+        let badgeClass = '';
+        let statusText = '';
+
+        if (ticket.status === 'open') {
+            badgeClass = 'badge-error';
+            statusText = 'Открыт';
+        } else if (ticket.status === 'in_progress') {
+            badgeClass = 'badge-warning';
+            statusText = 'В процессе';
+        } else {
+            badgeClass = 'badge-success';
+            statusText = 'Закрыт';
+        }
+
+        // Информация о принявшем
+        let acceptedInfo = 'На данный момент не принята';
+        if (ticket.accepted_by) {
+            acceptedInfo = `${ticket.accepted_by} в ${ticket.accepted_at}`;
+        }
+
+        ticketDiv.innerHTML = `
+            <div class="card-body">
+                <h3 class="card-title text-xl font-semibold">${ticket.title}</h3>
+
+                <p class="text-gray-500">Статус:
+                    <span class="badge ${badgeClass}">${statusText}</span>
+                </p>
+                <p class="text-gray-500">Создал:
+                    ${ticket.created_by} в ${ticket.created_at}
+                </p>
+                <p class="text-gray-500">Принял:
+                    ${acceptedInfo}
+                </p>
+
+                <a href="/tickets/ticket/${ticket.id}/" class="btn btn-secondary mt-2">Посмотреть детали</a>
+            </div>
+        `;
+
+        return ticketDiv;
+    }
+
+    // Показывает уведомление в браузере
+    function showNotification(title, body) {
+        if ('Notification' in window) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, { body });
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification(title, { body });
+                    }
+                });
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
