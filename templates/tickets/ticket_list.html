@@ -56,7 +56,27 @@
     <button id="open-chat-btn" class="btn btn-accent open-chat" data-ticket-id="{{ 25 }}">Открыть чат</button>
 
 <!-- джс для подгрузки є -->
-<script> function initializeChat(ticketId) {
+<script>
+
+    let socket; // Переменная для хранения сокета
+
+    function loadChat(ticketId) {
+        // Закрываем текущий сокет, если он есть
+
+        if (socket) {
+            socket.close();
+        }
+
+        fetch(`/chat/${ticketId}/`)
+            .then(response => response.text())
+            .then(html => {
+                document.querySelector('.card').innerHTML = html; // Заменяем содержимое текущего чата
+                initializeChat(ticketId); // Инициализируем JavaScript для нового чата
+            })
+            .catch(error => console.error("Ошибка загрузки чата:", error));
+    }
+
+    function initializeChat(ticketId) {
     const socketURL = `ws://${window.location.host}/ws/chat/${ticketId}/`;
     console.log("Establishing Socket Connection");
     const socket = new WebSocket(socketURL);
@@ -93,7 +113,9 @@
 
         scrollToBottom();
     });
-}</script>
+}
+initializeChat({{ ticket.id }});
+</script>
 <!-- Встроенный JavaScript для WebSocket -->
 <script>
 
