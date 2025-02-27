@@ -5,44 +5,86 @@
     <h2 class="text-3xl font-bold mb-4">Задачи</h2>
     <a href="{% url 'tickets:create_ticket' %}" class="btn btn-primary mb-4">Создать задачу</a>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {% for ticket in tickets %}
-        <div class="card bg-base-100 shadow-xl border border-gray-200" data-ticket-id="{{ ticket.id }}">
-            <div class="card-body">
-                <h3 class="card-title text-xl font-semibold">{{ ticket.title }}</h3>
+    <!-- Контейнер тикетов -->
+    <div id="ticket-container" class="transition-all duration-300 w-full lg:w-3/4 pr-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for ticket in tickets %}
+            <div class="card bg-base-100 shadow-xl border border-gray-200" data-ticket-id="{{ ticket.id }}">
+                <div class="card-body">
+                    <h3 class="card-title text-xl font-semibold">{{ ticket.title }}</h3>
 
-                <p class="text-gray-500">Статус:
-                    <span class="badge
-                        {% if ticket.status == 'open' %}badge-error
-                        {% elif ticket.status == 'in_progress' %}badge-warning
-                        {% else %}badge-success
-                        {% endif %}">
-                        {% if ticket.status == 'open' %}Открыт
-                        {% elif ticket.status == 'in_progress' %}В процессе
-                        {% else %}Закрыт
+                    <p class="text-gray-500">Статус:
+                        <span class="badge
+                            {% if ticket.status == 'open' %}badge-error
+                            {% elif ticket.status == 'in_progress' %}badge-warning
+                            {% else %}badge-success
+                            {% endif %}">
+                            {% if ticket.status == 'open' %}Открыт
+                            {% elif ticket.status == 'in_progress' %}В процессе
+                            {% else %}Закрыт
+                            {% endif %}
+                        </span>
+                    </p>
+                    <p class="text-gray-500">Создал:
+                        {{ ticket.created_by.username }} в {{ ticket.created_at|date:"H:i" }}
+                    </p>
+                    <p class="text-gray-500">Принял:
+                        {% if ticket.accepted_by %}
+                            {{ ticket.accepted_by.username }} в {{ ticket.accepted_at|date:"H:i" }}
+                        {% else %}
+                            {{ ticket.accepted_by.username|default:"На данный момент не принята" }}
                         {% endif %}
-                    </span>
-                </p>
-                <p class="text-gray-500">Создал:
-                    {{ ticket.created_by.username }} в {{ ticket.created_at|date:"H:i" }}
-                </p>
-                <p class="text-gray-500">Принял:
-                    {% if ticket.accepted_by %}
-                        {{ ticket.accepted_by.username }} в {{ ticket.accepted_at|date:"H:i" }}
-                    {% else %}
-                        {{ ticket.accepted_by.username|default:"На данный момент не принята" }}
-                    {% endif %}
-                </p>
+                    </p>
 
-                <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-secondary mt-2">Посмотреть детали</a>
+                    <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-secondary mt-2">Посмотреть детали</a>
+                </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
+
+<!-- Чат (скрыт по умолчанию) -->
+<div id="chat-container" class="hidden fixed top-0 right-0 h-full w-1/4 bg-gray-100 p-4 shadow-lg transition-all duration-300">
+    <p class="text-gray-500">Чат для тикета</p>
 </div>
+
+
+
+
+</div>
+<!-- Кнопка открытия чата -->
+    <button id="open-chat-btn" class="btn btn-accent open-chat" data-ticket-id="{{ 24 }}">Открыть чат</button>
+
+
 
 <!-- Встроенный JavaScript для WebSocket -->
 <script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".open-chat").forEach(button => {
+        button.addEventListener("click", function () {
+            const ticketId = this.dataset.ticketId;
+            const chatContainer = document.getElementById("chat-container");
+
+            fetch(`/chat/${ticketId}/`)
+                .then(response => response.text())
+                .then(html => {
+                    chatContainer.innerHTML = html;
+                })
+                .catch(error => console.error("Ошибка загрузки чата:", error));
+        });
+    });
+});
+document.addEventListener("DOMContentLoaded", function () {
+    const openChatBtn = document.querySelector(".open-chat");
+    const chatContainer = document.getElementById("chat-container");
+    const ticketContainer = document.getElementById("ticket-container");
+
+    openChatBtn.addEventListener("click", function () {
+        chatContainer.classList.remove("hidden"); // Показать чат
+        ticketContainer.classList.add("lg:col-span-3"); // Сдвинуть тикеты влево
+    });
+});
 document.addEventListener('DOMContentLoaded', function() {
     // Проверяем, что мы на странице со списком тикетов
     const ticketListContainer = document.querySelector('.grid');

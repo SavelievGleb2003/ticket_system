@@ -22,7 +22,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/', include(('account.urls', 'account'), namespace='account')),
-    path('tickets/', include(('tickets.urls', 'tickets'), namespace='tickets')),
+    path('', include(('tickets.urls', 'tickets'), namespace='tickets')),
     path('chat/', include(('chat.urls', 'chat'), namespace='chat')),
     path("__reload__/", include("django_browser_reload.urls")),
 ]

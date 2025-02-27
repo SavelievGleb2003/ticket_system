@@ -1,10 +1,12 @@
 from django.db import models
-import os
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from account.models import CustomUser, Department, Position
+import datetime
+import pytz
 
 
 class Ticket(models.Model):
@@ -35,17 +37,22 @@ class Ticket(models.Model):
         position_info = self.position.title if self.position else "No Position"
         return f"{self.title} - {department_info} ({position_info}) - {self.status} - {assigned_info}"
 
+
     def to_dict(self):
         """Преобразует объект тикета в словарь для передачи через WebSocket"""
+        kiev_tz = pytz.timezone('Europe/Kiev')
+        created_at_kiev = self.created_at.astimezone(kiev_tz)
+        accepted_at_kiev = self.accepted_at.astimezone(kiev_tz) if self.accepted_at else None
+
         return {
             'id': self.id,
             'title': self.title,
             'status': self.status,
             'status_display': self.get_status_display(),
             'created_by': self.created_by.username,
-            'created_at': self.created_at.strftime('%H:%M'),
+            'created_at': created_at_kiev.strftime('%H:%M'),
             'accepted_by': self.accepted_by.username if self.accepted_by else None,
-            'accepted_at': self.accepted_at.strftime('%H:%M') if self.accepted_at else None,
+            'accepted_at': accepted_at_kiev.strftime('%H:%M') if self.accepted_at else None,
             'department': self.department.name if self.department else None,
             'position': self.position.title if self.position else None,
         }
