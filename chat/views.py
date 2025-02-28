@@ -32,12 +32,19 @@ def chat_detail(request, ticket_id):
         return HttpResponseForbidden("Доступ запрещен")
 
     chat, created = Chat.objects.get_or_create(ticket=ticket)
+    # Проходимся по тикетам и ищем "другого" участника чата
+
 
     # Retrieve all messages for the chat (ordered by timestamp)
     messages = ChatMessage.objects.filter(chat=chat).order_by('timestamp')
     chats = Chat.objects.filter(
         Q(ticket__accepted_by=request.user) | Q(ticket__created_by=request.user)
     )
+    for ticket in chats:
+        # Получаем чат
+        other_user = ticket.participants.exclude(id=request.user.id).first()  # Исключаем текущего пользователя
+        ticket.other_participant = other_user  # Добавляем в объект ticket
+
     return render(request, 'chat/chat_detail.html', {
         'ticket': ticket,
         'chat': chat,
