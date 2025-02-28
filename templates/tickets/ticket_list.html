@@ -56,65 +56,68 @@
     <button id="open-chat-btn" class="btn btn-accent open-chat" data-ticket-id="{{ 25 }}">Открыть чат</button>
 
 <!-- джс для подгрузки є -->
-<script>
 
+<script>
     let socket; // Переменная для хранения сокета
 
     function loadChat(ticketId) {
-        // Закрываем текущий сокет, если он есть
-
-        if (socket) {
-            socket.close();
-        }
-
-        fetch(`/chat/${ticketId}/`)
-            .then(response => response.text())
-            .then(html => {
-                document.querySelector('.card').innerHTML = html; // Заменяем содержимое текущего чата
-                initializeChat(ticketId); // Инициализируем JavaScript для нового чата
-            })
-            .catch(error => console.error("Ошибка загрузки чата:", error));
+    // Закрываем текущий сокет, если он есть
+    if (socket) {
+        socket.close();
     }
 
-    function initializeChat(ticketId) {
-    const socketURL = `ws://${window.location.host}/ws/chat/${ticketId}/`;
-    console.log("Establishing Socket Connection");
-    const socket = new WebSocket(socketURL);
+    fetch(`/chat/${ticketId}/`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('chat-container').innerHTML = html; // Загружаем чат в нужное место
+            document.getElementById('chat-container').classList.remove('hidden'); // Показываем чат
+            initializeChat(ticketId); // Инициализируем WebSocket
+        })
+        .catch(error => console.error("Ошибка загрузки чата:", error));
+    }
 
-    const msgForm = document.getElementById("msg-form");
-    if (msgForm) {
-        msgForm.addEventListener("submit", function (event) {
-            event.preventDefault();
-            let message_sent = document.getElementById("message").value;
-            socket.send(JSON.stringify({ message: message_sent }));
+
+    function initializeChat(ticketId) {
+        const socketURL = `ws://${window.location.host}/ws/chat/${ticketId}/`;
+        console.log("Establishing Socket Connection for Ticket:", ticketId);
+        socket = new WebSocket(socketURL); // Создаем новый сокет
+
+        const msgForm = document.getElementById("msg-form");
+        if (msgForm) {
+            msgForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+                let message_sent = document.getElementById("message").value;
+                socket.send(JSON.stringify({ message: message_sent }));
+            });
+        }
+
+        const chatsDiv = document.getElementById("chats-container");
+        const scrollToBottom = () => {
+            chatsDiv.scrollTop = chatsDiv.scrollHeight;
+        };
+
+        socket.addEventListener("message", (e) => {
+            const data = JSON.parse(e.data)["message"];
+            let sender = data["sender"];
+            let content = data["message"];
+
+            if (sender == "{{user}}") {
+                document.getElementById("message").value = "";
+            }
+
+            chatsDiv.innerHTML += `<div class="flex ${sender == "{{user}}" ? "justify-end" : "justify-start"}">
+                <div class="max-w-xs px-4 py-2 rounded-lg ${sender == "{{user}}" ? "bg-purple-600 text-white" : "bg-orange-500 text-white"}">
+                    <p class="font-semibold" style="word-wrap: break-word;">${content}</p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 ${sender == "{{user}}" ? "text-right" : "text-left"}">${sender == "{{user}}" ? "Me" : sender}</p>`;
+
+            scrollToBottom();
         });
     }
 
-    const chatsDiv = document.getElementById("chats-container");
-    const scrollToBottom = () => {
-        chatsDiv.scrollTop = chatsDiv.scrollHeight;
-    };
-
-    socket.addEventListener("message", (e) => {
-        const data = JSON.parse(e.data)["message"];
-        let sender = data["sender"];
-        let content = data["message"];
-
-        if (sender == "{{user}}") {
-            document.getElementById("message").value = "";
-        }
-
-        chatsDiv.innerHTML += `<div class="flex ${sender == "{{user}}" ? "justify-end" : "justify-start"}">
-            <div class="max-w-xs px-4 py-2 rounded-lg ${sender == "{{user}}" ? "bg-purple-600 text-white" : "bg-orange-500 text-white"}">
-                <p class="font-semibold" style="word-wrap: break-word;">${content}</p>
-            </div>
-        </div>
-        <p class="text-xs text-gray-500 ${sender == "{{user}}" ? "text-right" : "text-left"}">${sender == "{{user}}" ? "Me" : sender}</p>`;
-
-        scrollToBottom();
-    });
-}
-initializeChat({{ ticket.id }});
+    // Инициализируем текущий чат при загрузке страницы
+    initializeChat({{ ticket.id }});
 </script>
 <!-- Встроенный JavaScript для WebSocket -->
 <script>
@@ -129,12 +132,15 @@ initializeChat({{ ticket.id }});
                 .then(response => response.text())
                 .then(html => {
                     chatContainer.innerHTML = html;
-                    initializeChat(ticketId, chatContainer); // Инициализация JavaScript чата
+                    chatContainer.classList.remove("hidden"); // Показываем чат
+                    initializeChat(ticketId); // Инициализация JavaScript чата
                 })
                 .catch(error => console.error("Ошибка загрузки чата:", error));
         });
     });
 });
+
+
 
 document.addEventListener("DOMContentLoaded", function () {
     const openChatBtn = document.querySelector(".open-chat");
