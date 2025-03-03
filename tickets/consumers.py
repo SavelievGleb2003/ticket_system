@@ -20,6 +20,7 @@ class TicketConsumer(AsyncWebsocketConsumer):
         # Загружаем пользователя с department и position
         self.user = await self.get_user(self.user.id)
 
+
         if self.user and self.user.department and self.user.position:
             self.department_group_name = f"department_{self.user.department.id}_{self.user.position.id}"
             await self.channel_layer.group_add(self.department_group_name, self.channel_name)

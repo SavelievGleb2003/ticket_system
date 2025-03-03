@@ -104,6 +104,13 @@ def ticket_post_save(sender, instance, created, **kwargs):
                 "ticket": ticket_data
             }
         )
+        async_to_sync(channel_layer.group_send)(
+            f"department_{instance.department.id}_{instance.position.id}",
+            {
+                "type": "ticket_created",
+                "ticket": ticket_data
+            }
+        )
 
     # Если тикет был закрыт
     elif instance.status == 'closed':
@@ -112,6 +119,13 @@ def ticket_post_save(sender, instance, created, **kwargs):
             f"user_{instance.created_by.id}",
             {
                 "type": "ticket_closed",
+                "ticket": ticket_data
+            }
+        )
+        async_to_sync(channel_layer.group_send)(
+            f"department_{instance.department.id}_{instance.position.id}",
+            {
+                "type": "ticket_created",
                 "ticket": ticket_data
             }
         )

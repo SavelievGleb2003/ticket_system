@@ -7,20 +7,30 @@ from django.contrib.auth.decorators import login_required
 from .models import Ticket
 from .forms import TicketForm
 from django.utils import timezone
-
+from chat.models import Chat
+from django.db.models import Q
 @login_required
 def ticket_list(request):
     user = request.user  # Получаем текущего пользователя
-
-    if user.is_authenticated:  # Проверяем, авторизован ли пользователь
+    chat_id = None  # Объявляем заранее
+    if user.is_authenticated:
         tickets = Ticket.objects.filter(
             department=user.department,
             position=user.position
         )
-    else:
-        tickets = Ticket.objects.none()  # Если пользователь не авторизован, не показываем тикеты
 
-    return render(request, 'tickets/ticket_list.html', {'tickets': tickets})
+        chat = Chat.objects.filter(
+            Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+        ).first()
+
+        chat_id = chat.ticket.id if chat else None
+    else:
+        tickets = Ticket.objects.none()
+    print(f'Передаем chat_id: {chat_id}')  # Для проверки
+    return render(request, 'tickets/ticket_list.html', {
+        'tickets': tickets,
+        'chat_id': chat_id
+    })
 
 @login_required
 def ticket_list_created_by(request):
@@ -30,10 +40,18 @@ def ticket_list_created_by(request):
         tickets = Ticket.objects.filter(
             created_by=request.user
         )
-    else:
-        tickets = Ticket.objects.none()  # Если пользователь не авторизован, не показываем тикеты
+        chat = Chat.objects.filter(
+            Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+        ).first()
 
-    return render(request, 'tickets/ticket_list.html', {'tickets': tickets})
+        chat_id = chat.ticket.id if chat else None
+    else:
+        tickets = Ticket.objects.none()
+    print(f'Передаем chat_id: {chat_id}')  # Для проверки
+    return render(request, 'tickets/ticket_list.html', {
+        'tickets': tickets,
+        'chat_id': chat_id
+    })
 
 
 @login_required
@@ -44,10 +62,18 @@ def ticket_list_accepted_by(request):
         tickets = Ticket.objects.filter(
             accepted_by=request.user
         )
-    else:
-        tickets = Ticket.objects.none()  # Если пользователь не авторизован, не показываем тикеты
+        chat = Chat.objects.filter(
+            Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+        ).first()
 
-    return render(request, 'tickets/ticket_list.html', {'tickets': tickets})
+        chat_id = chat.ticket.id if chat else None
+    else:
+        tickets = Ticket.objects.none()
+    print(f'Передаем chat_id: {chat_id}')  # Для проверки
+    return render(request, 'tickets/ticket_list.html', {
+        'tickets': tickets,
+        'chat_id': chat_id
+})
 
 
 @login_required
