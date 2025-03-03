@@ -9,6 +9,30 @@
     <title>Theme Toggle</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        const socket = new WebSocket(`ws://${window.location.host}/ws/tickets/`);
+
+        socket.onopen = function () {
+            socket.send(JSON.stringify({
+                type: "subscribe",
+                page: window.location.pathname  // Отправляем текущую страницу
+            }));
+        };
+
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+
+            if (data.type === "ticket_created") {
+                console.log("Новый тикет:", data.ticket);
+                // Логика обновления страницы
+            }
+        };
+
+        window.onbeforeunload = function () {
+            socket.send(JSON.stringify({ type: "unsubscribe" }));  // Удаляем пользователя при выходе
+        };
+
+
+
         function toggleTheme() {
             const htmlElement = document.documentElement;
             const currentTheme = htmlElement.getAttribute("data-theme");

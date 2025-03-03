@@ -66,8 +66,9 @@ def ticket_post_save(sender, instance, created, **kwargs):
 
     # Если это новый тикет
     if created:
+        from tickets.consumers import TicketConsumer  # Импортируем наш WebSocket-класс
         # Отправляем уведомление всем пользователям с тем же департаментом и должностью
-        if instance.department and instance.position:
+        if instance.department and instance.position and TicketConsumer.users_on_ticket_list:
             async_to_sync(channel_layer.group_send)(
                 f"department_{instance.department.id}_{instance.position.id}",
                 {
