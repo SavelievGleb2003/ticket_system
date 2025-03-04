@@ -26,7 +26,7 @@ def ticket_list(request):
         chat_id = chat.ticket.id if chat else None
     else:
         tickets = Ticket.objects.none()
-    print(f'Передаем chat_id: {chat_id}')  # Для проверки
+
     return render(request, 'tickets/ticket_list.html', {
         'tickets': tickets,
         'chat_id': chat_id
@@ -47,7 +47,7 @@ def ticket_list_created_by(request):
         chat_id = chat.ticket.id if chat else None
     else:
         tickets = Ticket.objects.none()
-    print(f'Передаем chat_id: {chat_id}')  # Для проверки
+
     return render(request, 'tickets/ticket_list.html', {
         'tickets': tickets,
         'chat_id': chat_id
@@ -69,7 +69,7 @@ def ticket_list_accepted_by(request):
         chat_id = chat.ticket.id if chat else None
     else:
         tickets = Ticket.objects.none()
-    print(f'Передаем chat_id: {chat_id}')  # Для проверки
+
     return render(request, 'tickets/ticket_list.html', {
         'tickets': tickets,
         'chat_id': chat_id
