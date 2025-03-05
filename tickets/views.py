@@ -6,47 +6,69 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from .models import Ticket
 from .forms import TicketForm
-from django.utils import timezone
+
 from chat.models import Chat
 from django.db.models import Q
+from django.utils import timezone
+from django.db.models import Q
+from datetime import timedelta
+
+
 @login_required
 def ticket_list(request):
-    user = request.user  # Получаем текущего пользователя
-    chat_id = None  # Объявляем заранее
-    if user.is_authenticated:
-        tickets = Ticket.objects.filter(
-            department=user.department,
-            position=user.position
-        )
+    user = request.user
+    chat_id = None
+    tickets = Ticket.objects.filter(
+        department=user.department,
+        position=user.position
+    )
 
-        chat = Chat.objects.filter(
-            Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
-        ).first()
+    # Get the filter period from GET parameters (today, week, or month)
+    time_filter = request.GET.get('time_filter', 'today')  # Default to 'today'
 
-        chat_id = chat.ticket.id if chat else None
-    else:
-        tickets = Ticket.objects.none()
+    # Filter tickets based on time period
+    if time_filter == 'today':
+        tickets = tickets.filter(created_at__date=timezone.now().date())
+    elif time_filter == 'week':
+        start_of_week = timezone.now() - timedelta(days=timezone.now().weekday())
+        tickets = tickets.filter(created_at__gte=start_of_week)
+    elif time_filter == 'month':
+        tickets = tickets.filter(created_at__year=timezone.now().year,
+                                 created_at__month=timezone.now().month)
+
+    # Retrieve chat info
+    chat = Chat.objects.filter(
+        Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+    ).first()
+
+    chat_id = chat.ticket.id if chat else None
 
     return render(request, 'tickets/ticket_list.html', {
         'tickets': tickets,
         'chat_id': chat_id
     })
 
+
 @login_required
 def ticket_list_created_by(request):
-    user = request.user  # Получаем текущего пользователя
+    user = request.user
+    time_filter = request.GET.get('time_filter', 'today')  # Default to 'today'
+    tickets = Ticket.objects.filter(created_by=request.user)
 
-    if user.is_authenticated:  # Проверяем, авторизован ли пользователь
-        tickets = Ticket.objects.filter(
-            created_by=request.user
-        )
-        chat = Chat.objects.filter(
-            Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
-        ).first()
+    if time_filter == 'today':
+        tickets = tickets.filter(created_at__date=timezone.now().date())
+    elif time_filter == 'week':
+        start_of_week = timezone.now() - timedelta(days=timezone.now().weekday())
+        tickets = tickets.filter(created_at__gte=start_of_week)
+    elif time_filter == 'month':
+        tickets = tickets.filter(created_at__year=timezone.now().year,
+                                 created_at__month=timezone.now().month)
 
-        chat_id = chat.ticket.id if chat else None
-    else:
-        tickets = Ticket.objects.none()
+    chat = Chat.objects.filter(
+        Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+    ).first()
+
+    chat_id = chat.ticket.id if chat else None
 
     return render(request, 'tickets/ticket_list.html', {
         'tickets': tickets,
@@ -56,24 +78,29 @@ def ticket_list_created_by(request):
 
 @login_required
 def ticket_list_accepted_by(request):
-    user = request.user  # Получаем текущего пользователя
+    user = request.user
+    time_filter = request.GET.get('time_filter', 'today')  # Default to 'today'
+    tickets = Ticket.objects.filter(accepted_by=request.user)
 
-    if user.is_authenticated:  # Проверяем, авторизован ли пользователь
-        tickets = Ticket.objects.filter(
-            accepted_by=request.user
-        )
-        chat = Chat.objects.filter(
-            Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
-        ).first()
+    if time_filter == 'today':
+        tickets = tickets.filter(created_at__date=timezone.now().date())
+    elif time_filter == 'week':
+        start_of_week = timezone.now() - timedelta(days=timezone.now().weekday())
+        tickets = tickets.filter(created_at__gte=start_of_week)
+    elif time_filter == 'month':
+        tickets = tickets.filter(created_at__year=timezone.now().year,
+                                 created_at__month=timezone.now().month)
 
-        chat_id = chat.ticket.id if chat else None
-    else:
-        tickets = Ticket.objects.none()
+    chat = Chat.objects.filter(
+        Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+    ).first()
+
+    chat_id = chat.ticket.id if chat else None
 
     return render(request, 'tickets/ticket_list.html', {
         'tickets': tickets,
         'chat_id': chat_id
-})
+    })
 
 
 @login_required

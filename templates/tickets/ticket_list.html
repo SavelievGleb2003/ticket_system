@@ -4,7 +4,16 @@
 <div class="container mx-auto p-6">
     <h2 class="text-3xl font-bold mb-4">Задачи</h2>
     <a href="{% url 'tickets:create_ticket' %}" class="btn btn-primary mb-4">Создать задачу</a>
-
+    <form method="get" class="mb-4">
+        <div class="flex gap-2 items-center">
+            <label class="font-semibold">Фильтр по дате:</label>
+            <select name="time_filter" class="select select-bordered" onchange="this.form.submit()">
+                <option value="today" {% if request.GET.time_filter == "today" %}selected{% endif %}>Сегодня</option>
+                <option value="week" {% if request.GET.time_filter == "week" %}selected{% endif %}>На этой неделе</option>
+                <option value="month" {% if request.GET.time_filter == "month" %}selected{% endif %}>Этот месяц</option>
+            </select>
+        </div>
+    </form>
     <!-- Контейнер тикетов -->
     <div id="ticket-container" class="transition-all duration-300 w-full lg:w-3/4 pr-4">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
