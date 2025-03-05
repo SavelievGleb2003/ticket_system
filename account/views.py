@@ -57,7 +57,7 @@ def edit(request):
 @login_required
 def dashboard(request):
     return render(request,
-                  'account/dashboard.html',
+                  'tickets/ticket_list.html',
                   {'section': 'dashboard'})
 
 

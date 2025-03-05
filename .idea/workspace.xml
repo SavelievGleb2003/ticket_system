@@ -7,8 +7,9 @@
     <list default="true" id="06825672-8041-41af-aefa-033d74be9083" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/chat/chat_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/chat/chat_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/registration/logged_out.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/registration/logged_out.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/tickets/ticket_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/tickets/ticket_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tickets/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/tickets/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

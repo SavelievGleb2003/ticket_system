@@ -3,6 +3,7 @@
 
 <div class="container mx-auto p-6">
     <h2 class="text-3xl font-bold mb-4">Задачи</h2>
+
     <a href="{% url 'tickets:create_ticket' %}" class="btn btn-primary mb-4">Создать задачу</a>
     <form method="get" class="mb-4">
         <div class="flex gap-2 items-center">
@@ -54,8 +55,13 @@
 
 <!-- Чат (скрыт по умолчанию) -->
 <div id="chat-container" class="hidden fixed top-0 right-0 h-full w-1/4 bg-gray-100 p-4 shadow-lg transition-all duration-300">
-    <p class="text-gray-500">Чат для тикета</p>
+    <div class="flex justify-between items-center mb-2">
+        <p class="text-gray-500">Чат для тикета</p>
+        <button onclick="closeChat()" class="btn btn-sm btn-error">Закрыть</button>
+    </div>
+    <!-- Здесь будет загружаться контент чата -->
 </div>
+
 
 
 
@@ -94,6 +100,8 @@
         })
         .catch(error => console.error("Ошибка загрузки чата:", error));
     }
+
+
 
 
     function initializeChat(ticketId) {
@@ -336,12 +344,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // Скрываем кнопку после открытия чата
                 this.classList.add("hidden");
+
             });
         }
     });
 
 
+function closeChat() {
+    const chatContainer = document.getElementById('chat-container');
+    const openChatBtn = document.getElementById('open-chat-btn');
+    const ticketContainer = document.getElementById('ticket-container');
 
+    if (chatContainer) {
+        chatContainer.classList.add('hidden'); // Прячем чат
+    }
+
+    if (openChatBtn) {
+        openChatBtn.classList.remove('hidden'); // Показываем кнопку "Открыть чат" обратно
+    }
+
+    if (ticketContainer) {
+        ticketContainer.classList.remove('lg:col-span-3'); // Возвращаем ширину тикетов в норму
+    }
+}
 
 </script>
 {% endblock %}
