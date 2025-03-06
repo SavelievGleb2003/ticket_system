@@ -55,9 +55,11 @@ def edit(request):
 
 def user_profile(request):
     user = request.user
-    profile = get_object_or_404(Profile, user=user)
-    return render(request, 'account/profile.html',
-                  {'profile': profile})
+
+    # Try to get the profile or create a new one
+    profile, created = Profile.objects.get_or_create(user=user)
+
+    return render(request, 'account/user_profile.html', {'profile': profile})
 
 
 @login_required

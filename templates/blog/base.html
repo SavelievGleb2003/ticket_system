@@ -60,18 +60,17 @@
                 <a href="{% url 'tickets:ticket_list' %}" class="btn btn-ghost">Задания</a>
                 <a href="{% url 'tickets:ticket_list_created_by' %}" class="btn btn-ghost">Мною создание задания</a>
                 <a href="{% url 'tickets:ticket_list_accepted_by' %}" class="btn btn-ghost">В работе</a>
+                <a href="{% url 'account:user_profile' %}" class="btn btn-ghost">
+                    {% if request.user.profile.photo %}
+                        <img src="{{ request.user.profile.photo.url }}" alt="Profile Picture"
+                             class="w-10 h-10 rounded-full border-2 border-primary object-cover">
+                    {% else %}
+                        <img src="https://via.placeholder.com/40" alt="Default Profile Picture"
+                             class="w-10 h-10 rounded-full border-2 border-gray-300 object-cover">
+                    {% endif %}
+                </a>
             </div>
-            <div class="dropdown dropdown-end md:hidden">
-                <label tabindex="0" class="btn btn-square btn-ghost">
-                    ☰
-                </label>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-52">
-<!--                    <li><a href="{% url 'account:dashboard' %}">Dashboard</a></li>-->
-                    <li><a href="{% url 'tickets:ticket_list' %}">Задания</a></li>
-                    <li><a href="{% url 'tickets:ticket_list_created_by' %}">Мною создание задания</a></li>
-                    <li><a href="{% url 'tickets:ticket_list_accepted_by' %}">В работе</a></li>
-                </ul>
-            </div>
+
             <button onclick="toggleTheme()" class="btn btn-circle bg-base-100 shadow-xl transition-all">
                 <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 transition-transform duration-500 ease-in-out"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
