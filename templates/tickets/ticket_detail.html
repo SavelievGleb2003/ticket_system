@@ -92,25 +92,22 @@
                 {% if ticket.department == request.user.department and ticket.position == request.user.position %}
                 <form action="{% url 'tickets:accept_ticket' ticket.id %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-warning">Accept Ticket</button>
+                    <button type="submit" class="btn btn-warning">Принять задание</button>
                 </form>
                 {% else %}
                     <!--<p class="text-gray-500">you don't have access rights to accept ticket.</p>-->
                 {% endif %}
             {% elif ticket.status == 'in_progress' %}
-                {% if ticket.accepted_by == request.user or  ticket.created_by == request.user %}
-                    <a href="{% url 'chat:chat_detail' ticket.id %}" class="btn btn-info">Go to Chat</a>
-                {% endif %}
                 {% if ticket.department == request.user.department and ticket.position == request.user.position and ticket.accepted_by == request.user %}
                 <form action="{% url 'tickets:close_ticket' ticket.id %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-success">Close Ticket</button>
+                    <button type="submit" class="btn btn-success">Закрыть задание</button>
                 </form>
                 {% else %}
 <!--                    <p class="text-gray-500">you don't have close rights to close ticket.</p>-->
                 {% endif %}
             {% else %}
-                <p class="text-gray-500">Ticket is closed.</p>
+                <p class="text-gray-500">Задание закрыто.</p>
             {% endif %}
         </div>
     </div>
