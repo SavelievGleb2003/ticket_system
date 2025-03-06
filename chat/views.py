@@ -31,7 +31,7 @@ def chat_detail(request, ticket_id):
     if not has_access:
         return HttpResponseForbidden("Доступ запрещен")
 
-    chat, created = Chat.objects.get_or_create(ticket=ticket)
+    chat = Chat.objects.get(ticket=ticket)
     # Проходимся по тикетам и ищем "другого" участника чата
 
 
