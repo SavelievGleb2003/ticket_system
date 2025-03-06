@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from .forms import LoginForm, ProfileEditForm, UserEditForm
+from .models import Profile, Position, Department
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
@@ -52,6 +53,11 @@ def edit(request):
 
 
 
+def user_profile(request):
+    user = request.user
+    profile = get_object_or_404(Profile, user=user)
+    return render(request, 'account/profile.html',
+                  {'profile': profile})
 
 
 @login_required
