@@ -4,168 +4,186 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% tailwind_css %}
-    <title>Theme Toggle</title>
+    <title>ЮЖК</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-out {
+            animation: fadeOut 3s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        .theme-transition {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 theme-transition min-h-screen flex flex-col">
+    <nav class="bg-base-200 shadow-lg sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="http://127.0.0.1:8000/ticket_list_created_by" class="text-2xl font-bold hover:text-primary transition-colors">ЮЖК</a>
+
+            {% if request.user.is_authenticated %}
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="{% url 'tickets:ticket_list' %}" class="btn btn-ghost hover:bg-base-300">Задания</a>
+                <a href="{% url 'tickets:ticket_list_created_by' %}" class="btn btn-ghost hover:bg-base-300">Мои задания</a>
+                <a href="{% url 'tickets:ticket_list_accepted_by' %}" class="btn btn-ghost hover:bg-base-300">В работе</a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <span class="text-lg hidden md:inline">Здравствуйте, {{ request.user.first_name|default:request.user.username }}</span>
+
+                <a href="{% url 'account:user_profile' %}" class="btn btn-ghost p-1 hover:ring-2 hover:ring-primary rounded-full transition-all">
+                    {% if request.user.profile.photo %}
+                        <img src="{{ request.user.profile.photo.url }}" alt="Profile Picture"
+                            class="w-10 h-10 rounded-full border-2 border-primary object-cover">
+                    {% else %}
+                        <img src="https://via.placeholder.com/40" alt="Default Profile Picture"
+                            class="w-10 h-10 rounded-full border-2 border-gray-300 object-cover">
+                    {% endif %}
+                </a>
+
+                <button id="theme-toggle-btn" class="btn btn-circle bg-base-100 hover:bg-base-300 shadow-md transition-all">
+                    <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform duration-500 ease-in-out"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Sun Icon -->
+                        <g id="sun-icon">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </g>
+                        <!-- Moon Icon -->
+                        <path id="moon-icon" class="hidden" d="M21 12.79A9 9 0 0111.21 3 7 7 0 1021 12.79z" />
+                    </svg>
+                </button>
+
+                <form action="{% url 'account:logout' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-error hover:btn-error-focus transition-colors">Выход</button>
+                </form>
+            </div>
+            {% else %}
+            <div>
+                <a href="{% url 'account:login' %}" class="btn btn-primary hover:bg-primary-focus transition-colors">Вход</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Mobile menu for small screens - could be implemented with JavaScript -->
+
+    {% block content2 %}
+    {% endblock %}
+
+    {% block content1 %}
+    {% endblock %}
+
+
+    {% block content %}
+    {% endblock %}
+
+
+    <footer class="bg-base-200 p-4 text-center text-sm mt-auto">
+        <div class="container mx-auto">
+            <p>© 2025 ЮЖК. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <div id="message-container" class="fixed top-5 right-5 z-50">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} shadow-lg mb-2 fade-out">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
     <script>
+        // WebSocket connection for real-time updates
         const ticketSocket = new WebSocket(`ws://${window.location.host}/ws/tickets/`);
 
-        ticketSocket.onopen = function () {
+        ticketSocket.onopen = function() {
             ticketSocket.send(JSON.stringify({
                 type: "subscribe",
                 page: window.location.pathname
             }));
         };
 
-        ticketSocket.onmessage = function (event) {
+        ticketSocket.onmessage = function(event) {
             const data = JSON.parse(event.data);
             if (data.type === "ticket_created") {
                 console.log("Новый тикет:", data.ticket);
+                // Add notification UI here if needed
             }
         };
 
-        window.onbeforeunload = function () {
+        window.onbeforeunload = function() {
             ticketSocket.send(JSON.stringify({ type: "unsubscribe" }));
         };
 
-
-
-
-        function toggleTheme() {
-            const htmlElement = document.documentElement;
-            const currentTheme = htmlElement.getAttribute("data-theme");
-            const newTheme = currentTheme === "light" ? "dark" : "light";
-            htmlElement.setAttribute("data-theme", newTheme);
-            localStorage.setItem("theme", newTheme); // Save theme
-
-            // Toggle icon animation
-            document.getElementById("theme-icon").classList.toggle("rotate-[360deg]");
-        }
-
-        // Load saved theme on page load
-        document.addEventListener("DOMContentLoaded", () => {
+        // Theme toggle functionality
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize theme from localStorage
             const savedTheme = localStorage.getItem("theme") || "light";
             document.documentElement.setAttribute("data-theme", savedTheme);
-        });
-    </script>
-</head>
-<body class="bg-gray-100">
-    <nav class="navbar bg-base-200 shadow-lg p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="http://127.0.0.1:8000/ticket_list_created_by" class="text-2xl font-bold">ЮЖК</a>
-            {% if request.user.is_authenticated %}
-            <div class="hidden md:flex space-x-4">
-<!--                <a href="{% url 'account:dashboard' %}" class="btn btn-ghost">Dashboard</a>-->
-                <a href="{% url 'tickets:ticket_list' %}" class="btn btn-ghost">Задания</a>
-                <a href="{% url 'tickets:ticket_list_created_by' %}" class="btn btn-ghost">Мною создание задания</a>
-                <a href="{% url 'tickets:ticket_list_accepted_by' %}" class="btn btn-ghost">В работе</a>
-                <a href="{% url 'account:user_profile' %}" class="btn btn-ghost">
-                    {% if request.user.profile.photo %}
-                        <img src="{{ request.user.profile.photo.url }}" alt="Profile Picture"
-                             class="w-10 h-10 rounded-full border-2 border-primary object-cover">
-                    {% else %}
-                        <img src="https://via.placeholder.com/40" alt="Default Profile Picture"
-                             class="w-10 h-10 rounded-full border-2 border-gray-300 object-cover">
-                    {% endif %}
-                </a>
-            </div>
+            updateThemeUI(savedTheme);
 
-            <button onclick="toggleTheme()" class="btn btn-circle bg-base-100 shadow-xl transition-all">
-                <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 transition-transform duration-500 ease-in-out"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <!-- Sun Icon (Day Mode) -->
-                    <g id="sun" class="sun transition-all duration-500 ease-in-out">
-                        <circle cx="12" cy="12" r="5" />
-                        <line x1="12" y1="1" x2="12" y2="3" />
-                        <line x1="12" y1="21" x2="12" y2="23" />
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                        <line x1="1" y1="12" x2="3" y2="12" />
-                        <line x1="21" y1="12" x2="23" y2="12" />
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                    </g>
+            // Set up theme toggle button
+            document.getElementById("theme-toggle-btn").addEventListener("click", toggleTheme);
 
-                <!-- Moon Icon (Night Mode) -->
-                <path id="moon" class="hidden transition-all duration-500 ease-in-out"
-                      d="M21 12.79A9 9 0 0111.21 3 7 7 0 1021 12.79z" />
-                </svg>
-            </button>
-
-
-            <div class="flex items-center space-x-2">
-                <span class="text-lg">Здравствуйте, {{ request.user.first_name|default:request.user.username }}</span>
-                <form action="{% url 'account:logout' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-error">Выход</button>
-                </form>
-            </div>
-            {% else %}
-            <a href="{% url 'account:login' %}" class="btn btn-primary">Вход</a>
-            {% endif %}
-        </div>
-    </nav>
-
-
-    {% block content2 %}
-    {% endblock %}
-
-
-    {% block content1 %}
-
-    {% endblock %}
-
-
-    <div class="container mx-auto p-6">
-        {% block content %}
-         {% endblock %}
-    </div>
-    <div id="message-container" class="fixed top-5 right-5 z-50">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} shadow-lg mb-2">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    </div>
-
-
-    <script>
-
-        document.addEventListener("DOMContentLoaded", function () {
+            // Auto-hide messages after delay
             setTimeout(() => {
-                document.querySelectorAll(".alert").forEach(el => el.remove());
-            }, 3000);
-        });
-        document.addEventListener("DOMContentLoaded", () => {
-            const savedTheme = localStorage.getItem("theme") || "light";
-            document.documentElement.setAttribute("data-theme", savedTheme);
-            updateIcon(savedTheme);
+                document.querySelectorAll(".alert").forEach(el => {
+                    el.classList.add("fade-out");
+                    setTimeout(() => el.remove(), 3000);
+                });
+            }, 500);
         });
 
         function toggleTheme() {
             const htmlElement = document.documentElement;
             const currentTheme = htmlElement.getAttribute("data-theme");
             const newTheme = currentTheme === "light" ? "dark" : "light";
+
+            // Update theme attribute
             htmlElement.setAttribute("data-theme", newTheme);
             localStorage.setItem("theme", newTheme);
-            updateIcon(newTheme);
+
+            // Update UI
+            updateThemeUI(newTheme);
         }
 
-        function updateIcon(theme) {
-            const sunIcon = document.getElementById("sun");
-            const moonIcon = document.getElementById("moon");
+        function updateThemeUI(theme) {
+            // Toggle icon visibility
+            const sunIcon = document.getElementById("sun-icon");
+            const moonIcon = document.getElementById("moon-icon");
 
             if (theme === "dark") {
                 moonIcon.classList.remove("hidden");
                 sunIcon.classList.add("hidden");
-
             } else {
                 sunIcon.classList.remove("hidden");
                 moonIcon.classList.add("hidden");
             }
+
+            // Animate icon
+            document.getElementById("theme-icon").classList.add("rotate-[360deg]");
+            setTimeout(() => {
+                document.getElementById("theme-icon").classList.remove("rotate-[360deg]");
+            }, 500);
         }
     </script>
-
 </body>
 </html>
