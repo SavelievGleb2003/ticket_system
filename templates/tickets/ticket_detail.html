@@ -43,22 +43,49 @@
                     {% endif %}
                 {% else %}
                 {{ ticket.accepted_by.username|default:"На данный момент не принята" }}
-                {% endif %} в
-                {{ ticket.accepted_at }}
+                {% endif %}
             </p>
         </div>
 
-        {% if ticket.screenshot %}
-            <div class="mt-4">
-                <h3 class="text-lg font-semibold">Прикрепленный снимок экрана:</h3>
-                <div class="border border-gray-300 rounded-lg overflow-hidden shadow-md max-w-xs">
-                    <img src="{{ ticket.screenshot.url }}" alt="Ticket Screenshot" class="w-full h-auto">
-                    <div class="p-2 bg-gray-100 text-center">
-                        <a href="{{ ticket.screenshot.url }}" target="_blank" class="link link-primary">View Full Image</a>
-                    </div>
-                </div>
+        {% if ticket.attachment %}
+        <div class="mt-4">
+            <h3 class="text-lg font-semibold">Прикрепленный файл:</h3>
+            <div class="border border-gray-300 rounded-lg overflow-hidden shadow-md max-w-xs">
+                {% with ticket.attachment.name|lower as filename %}
+                    {% with filename|slice:"-4:" as ext %} {# берём последние 4 символа, например .jpg #}
+                        {% if ext in ".jpg,.png,.gif,.jpeg" %}
+                            <!-- Для изображений -->
+                            <img src="{{ ticket.attachment.url }}" alt="Прикрепленный файл" class="w-full h-auto">
+                            <div class="p-2 bg-gray-100 text-center">
+                                <a href="{{ ticket.attachment.url }}" target="_blank" class="link link-primary">Открыть изображение</a>
+                            </div>
+                        {% elif ext == ".pdf" %}
+                            <!-- Для PDF -->
+                            <div class="flex items-center justify-center p-4 bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm10 8h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8V7h8v2z"/>
+                                </svg>
+                            </div>
+                            <div class="p-2 bg-gray-100 text-center">
+                                <a href="{{ ticket.attachment.url }}" target="_blank" class="link link-primary">Открыть PDF</a>
+                            </div>
+                        {% else %}
+                            <!-- Для всех остальных файлов -->
+                            <div class="flex items-center justify-center p-4 bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM13 9V3.5L18.5 9H13z"/>
+                                </svg>
+                            </div>
+                            <div class="p-2 bg-gray-100 text-center">
+                                <a href="{{ ticket.attachment.url }}" target="_blank" class="link link-primary">Скачать файл</a>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
             </div>
-        {% endif %}
+        </div>
+    {% endif %}
+
 
         <div class="mt-6 flex space-x-4">
             {% if ticket.status == 'open' %}

@@ -25,7 +25,7 @@ class Ticket(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='tickets', null=True, blank=True)
     position = models.ForeignKey(Position, on_delete=models.CASCADE, related_name='tickets', null=True, blank=True)
 
-    screenshot = models.ImageField(upload_to='tickets/screenshots', null=True, blank=True)
+    attachment = models.FileField(upload_to='tickets/', null=True, blank=True)
     # due_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     accepted_at = models.DateTimeField(null=True, blank=True)

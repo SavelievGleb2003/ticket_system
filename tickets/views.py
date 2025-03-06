@@ -112,7 +112,7 @@ def ticket_detail(request, ticket_id):
 @login_required
 def create_ticket(request):
     if request.method == 'POST':
-        form = TicketForm(request.POST)
+        form = TicketForm(request.POST, request.FILES)
         if form.is_valid():
             ticket = form.save(commit=False)
             ticket.created_by = request.user
