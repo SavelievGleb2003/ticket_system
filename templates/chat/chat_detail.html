@@ -1,24 +1,23 @@
 {% load static %}
 {% load tailwind_tags %}
-{% block title %}Chat{% endblock %}
+
 {% block content %}
 <!--<div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">-->
-<div class="w-full max-w-lg mb-4">
-    <div class="flex space-x-2 overflow-x-auto">
-        {% for t in tickets %}
-        <button class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300" data-ticket-id="{{ t.ticket.id }}" onclick="loadChat({{ t.ticket.id }})">
 
-            Chat {{ t.other_participant }}
-        </button>
 
-        {% endfor %}
-    </div>
-</div>
-
-<div class="card w-full max-w-lg bg-white shadow-xl p-6 rounded-lg">
-    <button type="button" onclick="closeChat()" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-xl font-bold">&times;</button>
     {% if has_access %}
-        <h1 class="text-2xl font-bold text-center text-gray-800">Chat for Ticket #{{ ticket.id }}</h1>
+    <button type="button" onclick="closeChat()" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-xl font-bold">&times;</button>
+    <div class="w-full max-w-lg mb-4">
+        <div class="flex space-x-2 overflow-x-auto">
+            {% for t in tickets %}
+            <button class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300" data-ticket-id="{{ t.ticket.id }}" onclick="loadChat({{ t.ticket.id }})">
+                Чат с {{ t.other_participant }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+        <h1 class="text-2xl font-bold text-center text-gray-800">Чат для задания #{{ ticket.id }}</h1>
         <div class="chats-container overflow-y-auto h-80 p-4 border rounded-lg bg-gray-50" id="chats-container">
             {% for message in messages %}
                 <div class="flex {% if message.sender == user %}justify-end{% else %}justify-start{% endif %}">
@@ -36,7 +35,7 @@
     {% else %}
         <h1 class="text-xl font-semibold text-center text-red-500">Доступ запрещен</h1>
     {% endif %}
-</div>
+
 
 
 
