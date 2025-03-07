@@ -357,23 +357,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 document.addEventListener("DOMContentLoaded", function () {
-        const chatButton = document.getElementById("open-chat-btn");
+    const chatContainer = document.getElementById("chat-container");
+    const openChatBtn = document.getElementById("open-chat-btn");
 
-        if (chatButton) {
-            chatButton.addEventListener("click", function () {
-                const ticketId = this.getAttribute("data-ticket-id");
+    // Проверяем, был ли открыт чат перед перезагрузкой
+    const savedChatId = localStorage.getItem("openChatId");
+    if (savedChatId) {
+        loadChat(savedChatId);
+    }
 
-                // Здесь можно добавить логику открытия чата, например, вызов функции
-                console.log("Чат открыт для тикета: " + ticketId);
-
-                // Скрываем кнопку после открытия чата
-                this.classList.add("hidden");
-
-            });
-        }
+    document.querySelectorAll(".open-chat").forEach(button => {
+        button.addEventListener("click", function () {
+            const ticketId = this.dataset.ticketId;
+            localStorage.setItem("openChatId", ticketId); // Сохраняем ID чата
+            loadChat(ticketId);
+        });
     });
+});
 
-
+// Функция закрытия чата
 function closeChat() {
     const chatContainer = document.getElementById('chat-container');
     const openChatBtn = document.getElementById('open-chat-btn');
@@ -390,7 +392,10 @@ function closeChat() {
     if (ticketContainer) {
         ticketContainer.classList.remove('lg:col-span-3'); // Возвращаем ширину тикетов в норму
     }
+
+    localStorage.removeItem("openChatId"); // Удаляем сохранённый ID чата
 }
+
 
 </script>
 {% endblock %}
