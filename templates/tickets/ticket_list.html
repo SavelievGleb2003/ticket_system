@@ -54,7 +54,7 @@
     </div>
 
 <!-- Чат (скрыт по умолчанию) -->
-<div id="chat-container" class="hidden fixed top-0 right-0 h-full w-1/4 bg-gray-100 p-4 shadow-lg transition-all duration-300">
+<div id="chat-container" class="hidden">
     <div class="flex justify-between items-center mb-2">
         <p class="text-gray-500">Чат для тикета</p>
         <button onclick="closeChat()" class="btn btn-sm btn-error">Закрыть</button>
@@ -81,6 +81,31 @@
 
 {% endif %}
 <!-- джс для подгрузки є -->
+
+
+<style>
+#chat-container {
+    position: fixed;
+    top: 73px;
+    right: 0;
+    width: 25%;
+    height: calc(100% - 60px);
+    background-color: #f3f4f6;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+@media (max-width: 768px) {
+    #chat-container {
+        width: 100%;
+        top: 0;
+        height: 100%;
+    }
+}
+</style>
 
 <script>
     let socket; // Переменная для хранения сокета
@@ -143,8 +168,7 @@
         });
     }
 
-    // Инициализируем текущий чат при загрузке страницы
-    initializeChat({{ chat_id }});
+
 
 
 
