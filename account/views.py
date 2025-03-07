@@ -61,6 +61,11 @@ def user_profile(request):
 
     return render(request, 'account/user_profile.html', {'profile': profile})
 
+def different_user_profile(request, profile_id):
+    # Try to get the profile or create a new one
+    profile = get_object_or_404(Profile, user_id=profile_id)
+
+    return render(request, 'account/user_profile.html', {'profile': profile})
 
 @login_required
 def dashboard(request):

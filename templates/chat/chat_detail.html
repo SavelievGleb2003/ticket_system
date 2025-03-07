@@ -8,13 +8,29 @@
     {% if has_access %}
     <button type="button" onclick="closeChat()" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-xl font-bold">&times;</button>
     <div class="w-full max-w-lg mb-4">
-        <div class="flex space-x-2 overflow-x-auto">
-            {% for t in tickets %}
-            <button class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300" data-ticket-id="{{ t.ticket.id }}" onclick="loadChat({{ t.ticket.id }})">
-                Чат с {{ t.other_participant }}
-            </button>
-            {% endfor %}
+        <div class="flex space-x-2 overflow-x-auto p-2 bg-gray-50 rounded-lg">
+        {% for t in tickets %}
+        <div class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg shadow-sm p-2 hover:bg-gray-100 transition cursor-pointer"
+             data-ticket-id="{{ t.ticket.id }}"
+             onclick="loadChat({{ t.ticket.id }})">
+            <div class="flex flex-col text-left">
+                <span class="font-medium text-gray-800">Чат с {{ t.other_participant }} {{ t.other_participant.id }}</span>
+            </div>
+            <a href="{% url 'account:different_user_profile' t.other_participant.id %}" class="btn btn-ghost p-1 hover:ring-2 hover:ring-primary rounded-full transition-all"
+               onclick="event.stopPropagation();">
+                {% if t.other_participant.profile.photo %}
+                    <img src="{{ t.other_participant.profile.photo.url }}" alt="Profile Picture"
+                         class="w-8 h-8 rounded-full border-2 border-primary object-cover pointer-events-none">
+                {% else %}
+                    <img src="/media/tickets/def.png" alt="Default Profile Picture"
+                         class="w-8 h-8 rounded-full border-2 border-gray-200 object-cover pointer-events-none">
+                {% endif %}
+            </a>
         </div>
+        {% endfor %}
+    </div>
+
+
     </div>
 
         <h1 class="text-2xl font-bold text-center text-gray-800">Чат для задания #{{ chat.id }}</h1>
