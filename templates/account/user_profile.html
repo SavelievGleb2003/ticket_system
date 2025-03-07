@@ -4,20 +4,24 @@
 <div class="container mx-auto p-6">
     <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-6">
         <div class="flex items-center space-x-6">
-            <!-- User Profile Picture -->
             {% if profile.photo %}
                 <img src="{{ profile.photo.url }}" alt="Profile Picture"
                      class="w-32 h-32 rounded-full border-4 border-primary object-cover">
             {% else %}
-                <!-- Default placeholder image -->
                 <img src="/media/tickets/def.png" alt="Default Profile Picture"
                      class="w-32 h-32 rounded-full border-4 border-gray-300 object-cover">
             {% endif %}
             <div>
-                <h2 class="text-2xl font-bold text-gray-800">{{ profile.user.get_full_name }}</h2>
+                <h2 class="text-2xl font-bold text-gray-800" id="full_name">{{ profile.user.get_full_name }}</h2>
                 <p class="text-gray-600">@{{ profile.user.username }}</p>
-                <p class="text-gray-500">📅 День рождения: {{ profile.date_of_birthday|default:"не указано" }}</p>
-                <p class="text-gray-500">📞 Внутренний номер: {{ profile.number|default:"не указано" }}</p>
+
+                <p class="text-gray-500">📅 День рождения:
+                    <span id="date_of_birthday">{{ profile.date_of_birthday|default:"не указано" }}</span>
+                </p>
+
+                <p class="text-gray-500">📞 Внутренний номер:
+                    <span id="number">{{ profile.number|default:"не указано" }}</span>
+                </p>
             </div>
         </div>
 
@@ -25,18 +29,81 @@
             <h3 class="text-xl font-semibold text-gray-700">Отдел</h3>
             <div class="mt-4 p-4 bg-gray-100 rounded-lg">
                 <p class="text-lg font-medium text-secondary">{{ profile.user.department.name|default:"не указано" }}</p>
-                <p class="text-gray-600">{{ profile.user.department.description|default:"Описание отдела отсутствует." }}</p>
+                <p class="text-gray-600" id="department_description">{{ profile.user.department.description|default:"Описание отдела отсутствует." }}</p>
             </div>
+
             <h3 class="text-xl font-semibold text-gray-700">Позиция</h3>
             <div class="p-4 bg-gray-100 rounded-lg">
                 <p class="text-lg font-medium text-primary">{{ profile.user.position.title|default:"не указано" }}</p>
-                <p class="text-gray-600">{{ profile.user.position.description|default:"Описание должности отсутствует." }}</p>
+                <p class="text-gray-600" id="position_description">{{ profile.user.position.description|default:"Описание должности отсутствует." }}</p>
             </div>
         </div>
 
+        {% if user == profile.user %}
         <div class="mt-6 flex justify-end">
-
+            <button id="edit_button" class="btn btn-secondary" onclick="enableEditing()">Редактировать</button>
+            <button id="save_button" class="btn btn-primary hidden" onclick="document.getElementById('edit_form').submit()">Сохранить</button>
         </div>
+
+        <form id="edit_form" method="post" enctype="multipart/form-data" class="hidden">
+            {% csrf_token %}
+            <input type="hidden" name="update_profile" value="1">
+
+            <div class="mb-4">
+                <label for="full_name_input" class="block text-gray-700 text-sm font-bold mb-2">Полное имя:</label>
+                <input type="text" name="full_name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="full_name_input" value="{{ profile.user.get_full_name }}">
+            </div>
+
+            <div class="mb-4">
+                <label for="date_of_birthday_input" class="block text-gray-700 text-sm font-bold mb-2">Дата рождения:</label>
+                <input type="date" name="date_of_birthday" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="date_of_birthday_input" value="">
+            </div>
+
+            <div class="mb-4">
+                <label for="number_input" class="block text-gray-700 text-sm font-bold mb-2">Внутренний номер:</label>
+                <input type="text" name="number" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="number_input" value="{{ profile.number|default:'' }}">
+            </div>
+
+            <div class="mb-4">
+                <label for="department_description_input" class="block text-gray-700 text-sm font-bold mb-2">Описание отдела:</label>
+                <textarea name="department_description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="department_description_input">{{ profile.user.department.description }}</textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="position_description_input" class="block text-gray-700 text-sm font-bold mb-2">Описание должности:</label>
+                <textarea name="position_description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="position_description_input">{{ profile.user.position.description }}</textarea>
+            </div>
+        </form>
+        {% endif %}
     </div>
 </div>
+
+<script>
+    function enableEditing() {
+        document.getElementById("edit_button").classList.add("hidden");
+        document.getElementById("save_button").classList.remove("hidden");
+
+        document.getElementById("full_name").classList.add("hidden");
+        document.getElementById("date_of_birthday").classList.add("hidden");
+        document.getElementById("number").classList.add("hidden");
+        document.getElementById("department_description").classList.add("hidden");
+        document.getElementById("position_description").classList.add("hidden");
+
+        document.getElementById("edit_form").classList.remove("hidden");
+
+        setDefaultDate();
+    }
+
+    function setDefaultDate() {
+        const dateInput = document.getElementById("date_of_birthday_input");
+        if (!dateInput.value) {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            dateInput.value = `${year}-${month}-${day}`;
+        }
+    }
+</script>
+
 {% endblock %}

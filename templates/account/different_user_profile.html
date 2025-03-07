@@ -1,0 +1,42 @@
+{% extends "blog/base.html" %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-6">
+        <div class="flex items-center space-x-6">
+            <!-- User Profile Picture -->
+            {% if profile.photo %}
+                <img src="{{ profile.photo.url }}" alt="Profile Picture"
+                     class="w-32 h-32 rounded-full border-4 border-primary object-cover">
+            {% else %}
+                <!-- Default placeholder image -->
+                <img src="/media/tickets/def.png" alt="Default Profile Picture"
+                     class="w-32 h-32 rounded-full border-4 border-gray-300 object-cover">
+            {% endif %}
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">{{ profile.user.get_full_name }}</h2>
+                <p class="text-gray-600">@{{ profile.user.username }}</p>
+                <p class="text-gray-500">📅 День рождения: {{ profile.date_of_birthday|default:"не указано" }}</p>
+                <p class="text-gray-500">📞 Внутренний номер: {{ profile.number|default:"не указано" }}</p>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <h3 class="text-xl font-semibold text-gray-700">Отдел</h3>
+            <div class="mt-4 p-4 bg-gray-100 rounded-lg">
+                <p class="text-lg font-medium text-secondary">{{ profile.user.department.name|default:"не указано" }}</p>
+                <p class="text-gray-600">{{ profile.user.department.description|default:"Описание отдела отсутствует." }}</p>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-700">Позиция</h3>
+            <div class="p-4 bg-gray-100 rounded-lg">
+                <p class="text-lg font-medium text-primary">{{ profile.user.position.title|default:"не указано" }}</p>
+                <p class="text-gray-600">{{ profile.user.position.description|default:"Описание должности отсутствует." }}</p>
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end">
+
+        </div>
+    </div>
+</div>
+{% endblock %}

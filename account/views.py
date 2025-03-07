@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
-from .forms import LoginForm, ProfileEditForm, UserEditForm
+from .forms import LoginForm, UserEditForm, ProfileForm
+
+from django.contrib import messages
 from .models import Profile, Position, Department
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate, login
@@ -30,42 +32,45 @@ def user_login(request):
 
 
 
-@login_required
-def edit(request):
-    if request.method == 'POST':
-        user_form = UserEditForm(
-            instance=request.user,
-            data=request.POST
-        )
-        profile_form = ProfileEditForm(
-            instance=request.user.profile,
-            data=request.POST,
-            files=request.FILES
-        )
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-    else:
-        user_form = UserEditForm(instance=request.user)
-        profile_form = ProfileEditForm(instance=request.user.profile)
-    return render(request, 'account/edit.html',{'user_form': user_form,'profile_form': profile_form})
-
-
-
-
-def user_profile(request):
-    user = request.user
-
-    # Try to get the profile or create a new one
-    profile, created = Profile.objects.get_or_create(user=user)
-
-    return render(request, 'account/user_profile.html', {'profile': profile})
 
 def different_user_profile(request, profile_id):
     # Try to get the profile or create a new one
     profile = get_object_or_404(Profile, user_id=profile_id)
 
+    return render(request, 'account/different_user_profile.html', {'profile': profile})
+
+
+
+
+@login_required
+def user_profile(request):
+    user = request.user
+    profile, created = Profile.objects.get_or_create(user=user)
+
+    if request.method == 'POST' and 'update_profile' in request.POST:
+
+        profile.date_of_birthday = request.POST.get('date_of_birthday', profile.date_of_birthday)
+        profile.number = request.POST.get('number', profile.number)
+
+        # Обновляем отдел
+        if user.department:
+            user.department.description = request.POST.get('department_description', user.department.description)
+            user.department.save()
+
+        # Обновляем должность
+        if user.position:
+            user.position.description = request.POST.get('position_description', user.position.description)
+            user.position.save()
+
+        # Сохраняем профиль и пользователя
+        profile.save()
+        user.save()  # <-- Добавляем это, чтобы убедиться, что изменения сохраняются
+
+        messages.success(request, "Профиль успешно обновлен.")
+        return redirect('account:user_profile')
+
     return render(request, 'account/user_profile.html', {'profile': profile})
+
 
 @login_required
 def dashboard(request):

@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="06825672-8041-41af-aefa-033d74be9083" name="Changes" comment="" />
+    <list default="true" id="06825672-8041-41af-aefa-033d74be9083" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/account/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/account/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/account/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/account/edit.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/account/user_profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/account/user_profile.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -35,18 +43,19 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/user/PycharmProjects/ticket_system/media/tickets"
+    "last_opened_file_path": "C:/Users/user/PycharmProjects/ticket_system/templates/blog"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\user\PycharmProjects\ticket_system\templates\blog" />
       <recent name="C:\Users\user\PycharmProjects\ticket_system\media\tickets" />
       <recent name="C:\Users\user\PycharmProjects\ticket_system" />
       <recent name="C:\Users\user\PycharmProjects\TurnoverDocument\blog\static\images" />
       <recent name="C:\Users\user\PycharmProjects\TurnoverDocument\static\images" />
-      <recent name="C:\Users\user\PycharmProjects\TurnoverDocument\templates\blog\TD" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\user\PycharmProjects\ticket_system\templates\account" />
       <recent name="C:\Users\user\PycharmProjects\ticket_system" />
     </key>
   </component>
