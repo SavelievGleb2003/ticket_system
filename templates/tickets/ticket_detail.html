@@ -30,6 +30,11 @@
                     {{ ticket.created_by.position }}
                 {% endif %} в
                 {{ ticket.created_at }}
+                {% if ticket.created_by.profile.number %}
+                    внутренний номер: {{ ticket.created_by.profile.number }}
+                {% else %}
+                    {{ ticket.created_by.profile.number|default:"У пользователя нету внутреннего номера" }}
+                {% endif %}
 
             <p><strong>задача была принята:</strong>
                 {% if ticket.accepted_by %}
@@ -43,6 +48,11 @@
                     {% endif %}
                 {% else %}
                 {{ ticket.accepted_by.username|default:"На данный момент не принята" }}
+                {% endif %}
+                {% if ticket.accepted_by.profile.number %}
+                    внутренний номер: {{ ticket.accepted_by.profile.number }}
+                {% else %}
+
                 {% endif %}
             </p>
         </div>
