@@ -48,7 +48,7 @@ STATIC_ROOT = BASE_DIR / 'static'
 #MEDIA_ROOT = BASE_DIR / 'media'
 # Application definition
 LANGUAGE_CODE = 'ru'# Set Russian as default language
-TIME_ZONE = 'Europe/Kiev'
+TIME_ZONE = 'Europe/Kyiv'
 USE_L10N = True
 INSTALLED_APPS = [
 
