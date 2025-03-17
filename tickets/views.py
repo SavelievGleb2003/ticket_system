@@ -70,7 +70,7 @@ def ticket_list_created_by(request):
 
     chat_id = chat.ticket.id if chat else None
 
-    return render(request, 'tickets/ticket_list.html', {
+    return render(request, 'tickets/my_created_ticket_list.html', {
         'tickets': tickets,
         'chat_id': chat_id
     })
@@ -97,7 +97,7 @@ def ticket_list_accepted_by(request):
 
     chat_id = chat.ticket.id if chat else None
 
-    return render(request, 'tickets/ticket_list.html', {
+    return render(request, 'tickets/my_accepted_ticket_list.html', {
         'tickets': tickets,
         'chat_id': chat_id
     })
