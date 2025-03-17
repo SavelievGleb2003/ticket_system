@@ -164,7 +164,14 @@ def close_ticket(request, ticket_id):
     if ticket.department != request.user.department or ticket.position != request.user.position or ticket.accepted_by != request.user:
         messages.error(request, "У вас нет прав на завершения этой задачи.")
         raise PermissionDenied("Вы не можете завершеть эту задачу.")
+    if request.method == "POST":
+        comment = request.POST.get("completion_comment")
+        if not comment:
+            messages.error(request, "Вы должны добавить комментарий перед закрытием задачи.")
+            return redirect('tickets:ticket_detail', ticket_id=ticket.id)
 
+
+    ticket.completion_comment = comment
     ticket.status = 'closed'
     ticket.save()
 
@@ -174,3 +181,6 @@ def close_ticket(request, ticket_id):
 
     messages.success(request, "Задача успешно закрыта, чат удален.")
     return redirect('tickets:ticket_detail', ticket_id=ticket.id)
+
+
+

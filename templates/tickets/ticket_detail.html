@@ -97,7 +97,7 @@
     {% endif %}
 
 
-        <div class="mt-6 flex space-x-4">
+        <div class="mt-6">
             {% if ticket.status == 'open' %}
                 {% if ticket.department == request.user.department and ticket.position == request.user.position %}
                 <form action="{% url 'tickets:accept_ticket' ticket.id %}" method="post">
@@ -109,10 +109,14 @@
                 {% endif %}
             {% elif ticket.status == 'in_progress' %}
                 {% if ticket.department == request.user.department and ticket.position == request.user.position and ticket.accepted_by == request.user %}
-                <form action="{% url 'tickets:close_ticket' ticket.id %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success">Закрыть задание</button>
-                </form>
+                    <form action="{% url 'tickets:close_ticket' ticket.id %}" method="post" class="mt-3 p-3 border rounded bg-light shadow-sm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="completion_comment" class="form-label fw-bold">Комментарий перед закрытием:</label>
+                            <textarea name="completion_comment" id="completion_comment" class="form-control" rows="5" style="width: 100%;" placeholder="Опишите, что было сделано..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 fw-bold">Закрыть задание</button>
+                    </form>
                 {% else %}
 <!--                    <p class="text-gray-500">you don't have close rights to close ticket.</p>-->
                 {% endif %}

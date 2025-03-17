@@ -29,7 +29,9 @@ class Ticket(models.Model):
     # due_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     accepted_at = models.DateTimeField(null=True, blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
+    completion_comment = models.TextField(null=True, blank=True)
 
     def __str__(self):
         assigned_info = self.accepted_by.username if self.accepted_by else "Unassigned"
