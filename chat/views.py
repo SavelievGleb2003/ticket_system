@@ -30,8 +30,7 @@ def chat_detail(request, ticket_id):
     has_access = request.user == ticket.created_by or request.user == ticket.accepted_by
     if not has_access:
         return HttpResponseForbidden("Доступ запрещен")
-
-    chat = Chat.objects.get(ticket=ticket)
+    chat = get_object_or_404(Chat, ticket=ticket)
     # Проходимся по тикетам и ищем "другого" участника чата
 
 

@@ -99,7 +99,7 @@
 
         <div class="mt-6">
             {% if ticket.status == 'open' %}
-                {% if ticket.department == request.user.department and ticket.position == request.user.position %}
+                {% if ticket.department == request.user.department and ticket.position == request.user.position and ticket.created_by != request.user%}
                 <form action="{% url 'tickets:accept_ticket' ticket.id %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-warning">Принять задание</button>

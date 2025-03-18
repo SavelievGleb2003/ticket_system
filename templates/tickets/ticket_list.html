@@ -397,6 +397,56 @@ function closeChat() {
     localStorage.removeItem("openChatId"); // Удаляем сохранённый ID чата
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+        const chatContainer = document.getElementById("chat-container");
+        const openChatBtn = document.getElementById("open-chat-btn");
+
+        // Проверяем, был ли открыт чат перед перезагрузкой
+        const savedChatId = localStorage.getItem("openChatId");
+
+        // Функция для обновления localStorage
+        function updateLocalStorage() {
+            if (chatContainer && !chatContainer.classList.contains("hidden")) {
+                // Чат открыт, получаем ticketId
+                const currentTicketId = chatContainer.dataset.ticketId; // Предполагаем, что у chat-container есть data-ticket-id
+
+                if (currentTicketId) {
+                    localStorage.setItem("openChatId", currentTicketId);
+                }
+            } else {
+                // Чат не открыт, очищаем localStorage
+                localStorage.removeItem("openChatId");
+            }
+        }
+
+        // Обновляем localStorage при загрузке страницы
+        updateLocalStorage();
+
+        if (savedChatId) {
+            // Проверяем, существует ли тикет
+            fetch(`/chat/${savedChatId}/`)
+                .then(response => {
+                    if (response.status === 404) {
+                        // Тикет не существует, очищаем localStorage
+                        localStorage.removeItem("openChatId");
+                        return;
+                    }
+                    loadChat(savedChatId);
+                })
+                .catch(error => {
+                    console.error("Ошибка проверки тикета:", error);
+                    localStorage.removeItem("openChatId"); // Очищаем localStorage при ошибке
+                });
+        }
+
+        document.querySelectorAll(".open-chat").forEach(button => {
+            button.addEventListener("click", function () {
+                const ticketId = this.dataset.ticketId;
+                localStorage.setItem("openChatId", ticketId); // Сохраняем ID чата
+                loadChat(ticketId);
+            });
+        });
+    });
 
 </script>
 {% endblock %}

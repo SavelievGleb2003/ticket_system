@@ -5,12 +5,21 @@ from django.core.exceptions import PermissionDenied
 from chat.models import Chat, ChatMessage
 from tickets.models import Ticket
 from account.models import CustomUser
-
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+from tickets.models import Ticket
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.user = self.scope["user"]  # Получаем текущего пользователя
+        self.user = self.scope["user"]
         self.ticket_id = self.scope["url_route"]["kwargs"]["ticket_id"]
+
+        # Проверяем, существует ли тикет
+        ticket_exists = await self.check_ticket_exists(self.ticket_id)
+        if not ticket_exists:
+            await self.close()
+            return
 
         # Проверяем, может ли пользователь участвовать в чате
         has_access = await self.check_user_accepted_by()
@@ -62,3 +71,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """Создаёт сообщение в базе данных."""
         chat, _ = Chat.objects.get_or_create(ticket_id=self.ticket_id)
         return ChatMessage.objects.create(chat=chat, sender=self.user, message=message)
+
+    @database_sync_to_async
+    def check_ticket_exists(self, ticket_id):
+        """Проверяет, существует ли тикет."""
+        return Ticket.objects.filter(id=ticket_id).exists()

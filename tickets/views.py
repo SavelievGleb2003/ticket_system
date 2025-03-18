@@ -132,7 +132,7 @@ def accept_ticket(request, ticket_id):
         messages.error(request, "Эта задача уже занята или завершена.")
         return redirect('tickets:ticket_list')
 
-    if ticket.department != request.user.department or ticket.position != request.user.position:
+    if ticket.department != request.user.department or ticket.position != request.user.position or ticket.created_by == request.user:
         messages.error(request, "У вас нет прав на принятие этой задачи.")
         raise PermissionDenied("Вы не можете принять эту задачу.")
 
