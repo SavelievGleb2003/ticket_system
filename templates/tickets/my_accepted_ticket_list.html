@@ -380,11 +380,27 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener("DOMContentLoaded", function () {
     const chatContainer = document.getElementById("chat-container");
     const openChatBtn = document.getElementById("open-chat-btn");
+    const ticketContainer = document.getElementById("ticket-container");
 
     // Проверяем, был ли открыт чат перед перезагрузкой
     const savedChatId = localStorage.getItem("openChatId");
     if (savedChatId) {
-        loadChat(savedChatId);
+        // Проверяем, существует ли тикет
+        fetch(`/chat/${savedChatId}/`)
+            .then(response => {
+                if (response.status === 404) {
+                    // Тикет не существует, очищаем localStorage
+                    localStorage.removeItem("openChatId");
+                    console.log("Сохраненный чат был удален");
+                    return;
+                }
+                // Если чат существует, загружаем его
+                loadChat(savedChatId);
+            })
+            .catch(error => {
+                console.error("Ошибка проверки тикета:", error);
+                localStorage.removeItem("openChatId"); // Очищаем localStorage при ошибке
+            });
     }
 
     document.querySelectorAll(".open-chat").forEach(button => {
