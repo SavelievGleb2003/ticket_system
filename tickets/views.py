@@ -170,8 +170,8 @@ def close_ticket(request, ticket_id):
             messages.error(request, "Вы должны добавить комментарий перед закрытием задачи.")
             return redirect('tickets:ticket_detail', ticket_id=ticket.id)
 
-
     ticket.completion_comment = comment
+    ticket.closed_at = timezone.now()
     ticket.status = 'closed'
     ticket.save()
 

@@ -39,12 +39,12 @@ class Ticket(models.Model):
         position_info = self.position.title if self.position else "No Position"
         return f"{self.title} - {department_info} ({position_info}) - {self.status} - {assigned_info}"
 
-
     def to_dict(self):
         """Преобразует объект тикета в словарь для передачи через WebSocket"""
         kiev_tz = pytz.timezone('Europe/Kiev')
         created_at_kiev = self.created_at.astimezone(kiev_tz)
         accepted_at_kiev = self.accepted_at.astimezone(kiev_tz) if self.accepted_at else None
+        closed_at_kiev = self.closed_at.astimezone(kiev_tz) if self.closed_at else None
 
         return {
             'id': self.id,
@@ -55,6 +55,7 @@ class Ticket(models.Model):
             'created_at': created_at_kiev.strftime('%H:%M'),
             'accepted_by': self.accepted_by.username if self.accepted_by else None,
             'accepted_at': accepted_at_kiev.strftime('%H:%M') if self.accepted_at else None,
+            'closed_at': closed_at_kiev.strftime('%H:%M') if self.closed_at else None,
             'department': self.department.name if self.department else None,
             'position': self.position.title if self.position else None,
         }

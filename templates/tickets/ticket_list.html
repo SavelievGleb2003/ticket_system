@@ -46,6 +46,11 @@
                             {{ ticket.accepted_by.username|default:"На данный момент не принята" }}
                         {% endif %}
                     </p>
+                    <p class="text-gray-500">
+                        {% if ticket.closed_at %}
+                                Закрыл: {{ ticket.accepted_by.username }} в {{ ticket.closed_at|date:"H:i" }}
+                        {% endif %}
+                    </p>
 
                     <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-secondary mt-2">Посмотреть детали</a>
                 </div>
@@ -234,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'ticket_closed':
                 updateTicket(data.ticket);
-                showNotification('Задача закрыта', `${data.ticket.title} завершена`);
+                showNotification('Задача закрыта', `${data.ticket.title} завершена ${data.ticket.closed_at}`);
                 break;
         }
     };
@@ -289,11 +294,19 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 acceptedByElement.textContent = 'Принял: На данный момент не принята';
             }
+
+        }
+        const closedInfoElement = existingTicket.querySelector('p:nth-of-type(4)'); // Или используйте класс, если добавили
+        if (closedInfoElement) {
+            if (ticket.closed_at) {
+                closedInfoElement.textContent = `Закрыл: ${ticket.accepted_by} в ${ticket.closed_at}`;
+            }
         }
     }
 
     // Создает элемент тикета
     function createTicketElement(ticket) {
+        console.log('Данные тикета при создании:', ticket); // Отладка
         const ticketDiv = document.createElement('div');
         ticketDiv.className = 'card bg-base-100 shadow-xl border border-gray-200';
         ticketDiv.setAttribute('data-ticket-id', ticket.id);
@@ -318,6 +331,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (ticket.accepted_by) {
             acceptedInfo = `${ticket.accepted_by} в ${ticket.accepted_at}`;
         }
+        let closedInfo = 'На данный момент не завершено';
+        if (ticket.closed_at){
+            closedInfo = `${ticket.accepted_by} в ${ticket.closed_at}`;
+        }
 
         ticketDiv.innerHTML = `
             <div class="card-body">
@@ -331,6 +348,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 </p>
                 <p class="text-gray-500">Принял:
                     ${acceptedInfo}
+                </p>
+                <p class="text-gray-500">Закрыл:
+                    ${closedInfo}
                 </p>
 
                 <a href="/ticket/${ticket.id}/" class="btn btn-secondary mt-2">Посмотреть детали</a>
