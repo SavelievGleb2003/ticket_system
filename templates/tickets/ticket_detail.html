@@ -3,6 +3,7 @@
 {% load l10n %}
 <div class="container mx-auto p-6">
     <div class="card bg-base-100 shadow-xl border border-gray-200 p-6">
+        <h1 class="text-3xl font-bold mb-2">Задания №{{ ticket.id }}</h1>
         <h2 class="text-3xl font-bold mb-2">{{ ticket.title }}</h2>
         <p class="text-gray-600">{{ ticket.description }}</p>
         
@@ -95,14 +96,24 @@
             </div>
         </div>
     {% endif %}
-    {% if ticket.status != 'in_progress' and ticket.status != 'closed' and ticket.accepted_by is None and ticket.accepted_at is None and ticket.department == request.user.department and ticket.position == request.user.position %}
-        <div class="fixed bottom-4 right-4">
-            <a href="{% url 'tickets:redirect_ticket' ticket.id %}" class="btn btn-primary shadow-lg">
-                🔄 Перенаправить тикет
-            </a>
-        </div>
-    {% endif %}
-
+    {% if ticket.status == 'open' %}
+        {% if ticket.status != 'in_progress' and ticket.status != 'closed' and ticket.accepted_by is None and ticket.accepted_at is None and ticket.department == request.user.department and ticket.position == request.user.position %}
+            <div class="fixed bottom-4 right-4">
+                <a href="{% url 'tickets:redirect_ticket' ticket.id %}" class="btn btn-primary shadow-lg">
+                    🔄 Перенаправить тикет
+                </a>
+            </div>
+        {% endif %}
+     {% endif %}
+     {% if ticket.status == 'in_progress' %}
+        {% if ticket.status != 'open' and ticket.status != 'closed' and ticket.accepted_by is not None and ticket.accepted_at is not None and ticket.department == request.user.department and ticket.position == request.user.position %}
+            <div class="fixed bottom-4 right-4">
+                <a href="{% url 'tickets:clone_ticket' ticket.id %}" class="btn bg-lime-500 text-white shadow-lg">
+                    ➕ Клонировать тикет
+                </a>
+            </div>
+        {% endif %}
+     {% endif %}
         <div class="mt-6">
             {% if ticket.status == 'open' %}
                 {% if ticket.department == request.user.department and ticket.position == request.user.position and ticket.created_by != request.user%}

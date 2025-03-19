@@ -5,7 +5,7 @@ from chat.models import Chat  # импорт модели чата
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from .models import Ticket
-from .forms import TicketForm, TicketRedirectForm
+from .forms import TicketForm, TicketRedirectForm, TicketCloneForm
 from account.models import CustomUser
 from chat.models import Chat
 from django.db.models import Q
@@ -218,3 +218,38 @@ def redirect_ticket(request, ticket_id):
 
     return render(request, 'tickets/redirect_ticket.html', {'form': form, 'ticket': ticket})
 
+
+@login_required
+def clone_ticket(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if ticket.status != 'in_progress':
+        messages.error(request, "Тикет нельзя клонировать, так как он не в процессе выполнения или уже выполнен.")
+        return redirect('tickets:ticket_list')
+
+    if ticket.accepted_by != request.user or ticket.accepted_at is None:
+         messages.error(request, "Вы не можете клонировать этот тикет, так как он уже не был принят вами.")
+         return redirect('tickets:ticket_list')
+
+    if ticket.department != request.user.department or ticket.position != request.user.position:
+        messages.error(request, "Вы не можете клонировать этот тикет, так как он предназначен не для вашего отдела или позиции .")
+        return redirect('tickets:ticket_list')
+
+    if request.method == 'POST':
+        ticket.old_position = None
+        ticket.old_department = None
+        form = TicketCloneForm(request.POST, instance=ticket)
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            # Очищаем текущее назначение, чтобы новый исполнитель мог принять тикет
+            ticket.accepted_at = None
+            ticket.accepted_by = None
+            ticket.status = 'open'
+            ticket.save()
+
+            messages.success(request, "Задача успешно клонировать, теперь ее может принять другой сотрудник.")
+            return redirect('tickets:ticket_detail', ticket_id=ticket_id)
+    else:
+        form = TicketCloneForm(instance=ticket)
+
+    return render(request, 'tickets/clone_ticket.html', {'form': form, 'ticket': ticket})
