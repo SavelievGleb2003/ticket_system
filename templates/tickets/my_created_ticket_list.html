@@ -331,13 +331,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (ticket.accepted_by) {
             acceptedInfo = `${ticket.accepted_by} в ${ticket.accepted_at}`;
         }
-        let closedInfo = 'На данный момент не завершено';
-        if (ticket.closed_at){
-            closedInfo = `${ticket.accepted_by} в ${ticket.closed_at}`;
-        }
+        let closedInfo = ticket.closed_at
+            ? `<p class="text-gray-500">Закрыл: ${ticket.accepted_by} в ${ticket.closed_at}</p>`
+            : '';
 
         ticketDiv.innerHTML = `
             <div class="card-body">
+                <h2 class="card-title text-xl font-semibold">Задания №${ticket.id}</h2>
                 <h3 class="card-title text-xl font-semibold">${ticket.title}</h3>
 
                 <p class="text-gray-500">Статус:
@@ -349,9 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p class="text-gray-500">Принял:
                     ${acceptedInfo}
                 </p>
-                <p class="text-gray-500">Закрыл:
-                    ${closedInfo}
-                </p>
+                 ${closedInfo}
 
                 <a href="/ticket/${ticket.id}/" class="btn btn-secondary mt-2">Посмотреть детали</a>
             </div>
