@@ -24,6 +24,8 @@ class Ticket(models.Model):
                                     blank=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='tickets', null=True, blank=True)
     position = models.ForeignKey(Position, on_delete=models.CASCADE, related_name='tickets', null=True, blank=True)
+    old_department = models.ForeignKey(Department, on_delete=models.SET_NULL, related_name='old_department', null=True, blank=True)
+    old_position = models.ForeignKey(Position, on_delete=models.SET_NULL, related_name='old_position', null=True, blank=True)
 
     attachment = models.FileField(upload_to='tickets/', null=True, blank=True)
     # due_date = models.DateField(null=True, blank=True)
@@ -143,3 +145,25 @@ def ticket_post_save(sender, instance, created, **kwargs):
                     "ticket": ticket_data
                 }
             )
+    if instance.old_department is not None and instance.old_position is not None:
+        if (instance.old_department != instance.department) or (instance.old_position != instance.position):
+            async_to_sync(channel_layer.group_send)(
+                f"department_{instance.department.id}_{instance.position.id}",
+                {
+                    "type": "ticket_created",
+                    "ticket": ticket_data
+                }
+            )
+
+            # Уведомляем создателя тикета
+            async_to_sync(channel_layer.group_send)(
+                f"user_{instance.created_by.id}",
+                {"type": "ticket_redirected", "ticket": ticket_data}
+            )
+
+            # Уведомляем принявшего тикет (если есть)
+            if instance.accepted_by:
+                async_to_sync(channel_layer.group_send)(
+                    f"accepted_{instance.accepted_by.id}",
+                    {"type": "ticket_redirected", "ticket": ticket_data}
+                )

@@ -202,6 +202,8 @@ def redirect_ticket(request, ticket_id):
         return redirect('tickets:ticket_list')
 
     if request.method == 'POST':
+        ticket.old_position = ticket.position
+        ticket.old_department = ticket.department
         form = TicketRedirectForm(request.POST, instance=ticket)
         if form.is_valid():
             ticket = form.save(commit=False)
