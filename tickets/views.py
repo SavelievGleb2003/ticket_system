@@ -5,8 +5,8 @@ from chat.models import Chat  # импорт модели чата
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from .models import Ticket
-from .forms import TicketForm
-
+from .forms import TicketForm, TicketRedirectForm
+from account.models import CustomUser
 from chat.models import Chat
 from django.db.models import Q
 from django.utils import timezone
@@ -164,6 +164,7 @@ def close_ticket(request, ticket_id):
     if ticket.department != request.user.department or ticket.position != request.user.position or ticket.accepted_by != request.user:
         messages.error(request, "У вас нет прав на завершения этой задачи.")
         raise PermissionDenied("Вы не можете завершеть эту задачу.")
+
     if request.method == "POST":
         comment = request.POST.get("completion_comment")
         if not comment:
@@ -183,4 +184,35 @@ def close_ticket(request, ticket_id):
     return redirect('tickets:ticket_detail', ticket_id=ticket.id)
 
 
+
+@login_required
+def redirect_ticket(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if ticket.status == 'in_progress' or ticket.status == 'closed':
+        messages.error(request, "Тикет нельзя перенаправить, так как он в процессе выполнения или уже выполнен.")
+        return redirect('tickets:ticket_list')
+
+    if ticket.accepted_by == request.user or ticket.accepted_at is not None:
+         messages.error(request, "Вы не можете перенаправить этот тикет, так как он уже был принят вами.")
+         return redirect('tickets:ticket_list')
+
+    if ticket.department != request.user.department or ticket.position != request.user.position:
+        messages.error(request, "Вы не можете перенаправить этот тикет, так как он предназначен не для вашего отдела или позиции .")
+        return redirect('tickets:ticket_list')
+
+    if request.method == 'POST':
+        form = TicketRedirectForm(request.POST, instance=ticket)
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            # Очищаем текущее назначение, чтобы новый исполнитель мог принять тикет
+            ticket.status = 'open'
+            ticket.save()
+
+            messages.success(request, "Задача успешно перенаправлена, теперь ее может принять другой сотрудник.")
+            return redirect('tickets:ticket_detail', ticket_id=ticket.id)
+    else:
+        form = TicketRedirectForm(instance=ticket)
+
+    return render(request, 'tickets/redirect_ticket.html', {'form': form, 'ticket': ticket})
 

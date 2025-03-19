@@ -1,0 +1,32 @@
+{% extends "blog/base.html" %}
+{% block content %}
+<div class="container mx-auto p-6 flex justify-center">
+    <div class="card bg-base-100 shadow-xl border border-gray-200 p-6 w-full max-w-lg">
+        <h2 class="text-3xl font-bold mb-4 text-center">Перенаправить задачу</h2>
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">Отдел</span>
+                </label>
+                {{ form.department }}
+            </div>
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">Должность</span>
+                </label>
+                {{ form.position }}
+            </div>
+<!--            <div class="form-control">-->
+<!--                <label class="label">-->
+<!--                    <span class="label-text">Due Date</span>-->
+<!--                </label>-->
+<!--                {{ form.due_date }}-->
+<!--            </div>-->
+            <div class="flex justify-center">
+                <button type="submit" class="btn btn-primary w-full">Перенаправить</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

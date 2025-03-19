@@ -95,7 +95,13 @@
             </div>
         </div>
     {% endif %}
-
+    {% if ticket.status != 'in_progress' and ticket.status != 'closed' and ticket.accepted_by is None and ticket.accepted_at is None and ticket.department == request.user.department and ticket.position == request.user.position %}
+        <div class="fixed bottom-4 right-4">
+            <a href="{% url 'tickets:redirect_ticket' ticket.id %}" class="btn btn-primary shadow-lg">
+                🔄 Перенаправить тикет
+            </a>
+        </div>
+    {% endif %}
 
         <div class="mt-6">
             {% if ticket.status == 'open' %}
