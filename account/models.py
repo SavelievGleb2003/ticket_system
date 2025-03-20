@@ -5,6 +5,13 @@ from django.conf import settings
 class Department(models.Model):
     name = models.CharField(max_length=80)
     location = models.CharField(max_length=80)
+    boss = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="department_boss"
+    )
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
