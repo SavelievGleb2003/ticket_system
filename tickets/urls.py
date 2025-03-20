@@ -12,4 +12,5 @@ urlpatterns = [
     path('create/', views.create_ticket, name='create_ticket'),
     path('ticket/<int:ticket_id>/redirect/', views.redirect_ticket, name='redirect_ticket'),
     path('ticket/<int:ticket_id>/clone/', views.clone_ticket, name='clone_ticket'),
+    path('ticket/data_analytics/',views.tickets_analytics_for_the_department,  name='data_analytics_for_the_department'),
 ]

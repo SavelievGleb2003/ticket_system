@@ -33,7 +33,7 @@
             {% if request.user.is_authenticated %}
             <div class="hidden md:flex items-center space-x-6">
                 {% if request.user == request.user.department.boss %}
-                    <a href="{% url 'tickets:ticket_list' %}" class="btn btn-ghost hover:bg-base-300">Аналитика данных</a>
+                    <a href="{% url 'tickets:data_analytics_for_the_department' %}" class="btn btn-ghost hover:bg-base-300">Аналитика данных</a>
                 {% endif %}
                 <a href="{% url 'tickets:ticket_list' %}" class="btn btn-ghost hover:bg-base-300">Задания</a>
                 <a href="{% url 'tickets:ticket_list_created_by' %}" class="btn btn-ghost hover:bg-base-300">Мои задания</a>

@@ -8,7 +8,6 @@ from .models import Ticket
 from .forms import TicketForm, TicketRedirectForm, TicketCloneForm
 from account.models import CustomUser
 from chat.models import Chat
-from django.db.models import Q
 from django.utils import timezone
 from django.db.models import Q
 from datetime import timedelta
@@ -253,3 +252,42 @@ def clone_ticket(request, ticket_id):
         form = TicketCloneForm(instance=ticket)
 
     return render(request, 'tickets/clone_ticket.html', {'form': form, 'ticket': ticket})
+
+
+
+@login_required
+def tickets_analytics_for_the_department(request):
+    user = request.user
+    tickets = Ticket.objects.filter(
+        department=user.department
+    )
+
+    users = CustomUser.objects.filter(department=user.department).exclude(id=user.department.boss.id)
+    # Get the filter period from GET parameters (today, week, or month)
+    time_filter = request.GET.get('time_filter', 'today')  # Default to 'today'
+
+    # Filter tickets based on time period
+    if time_filter == 'today':
+        tickets = tickets.filter(created_at__date=timezone.now().date())
+    elif time_filter == 'week':
+        start_of_week = timezone.now() - timedelta(days=timezone.now().weekday())
+        tickets = tickets.filter(created_at__gte=start_of_week)
+    elif time_filter == 'month':
+        tickets = tickets.filter(created_at__year=timezone.now().year,
+                                 created_at__month=timezone.now().month)
+    ticket_counts = {
+        "closed": tickets.filter(status="closed").count(),
+        "in_progress": tickets.filter(status="in_progress").count(),
+        "open": tickets.filter(status="open").count(),
+    }
+    position_counts = {
+        user.position.title: tickets.filter(position=user.position).count()
+        for user in users
+    }
+
+    return render(request, 'data_analytics/data_analytics_for_the_department.html', {
+        'tickets': tickets,
+        'users': users,
+        "ticket_counts": ticket_counts,  # ✅ Pass to template
+        "position_counts": position_counts,  # ✅ Pass to template
+    })
