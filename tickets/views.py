@@ -13,6 +13,10 @@ from django.db.models import Q
 from datetime import timedelta
 
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+
 @login_required
 def ticket_list(request):
     user = request.user
@@ -178,6 +182,15 @@ def close_ticket(request, ticket_id):
     # Удаляем связанный чат, если он существует
     if hasattr(ticket, 'chat'):
         ticket.chat.delete()
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"chat_{ticket.id}",  # Группа, соответствующая чату тикета
+            {
+                "type": "chat_closed",
+                "ticket_id": ticket.id
+            }
+        )
 
     messages.success(request, "Задача успешно закрыта, чат удален.")
     return redirect('tickets:ticket_detail', ticket_id=ticket.id)

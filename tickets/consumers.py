@@ -75,6 +75,13 @@ class TicketConsumer(AsyncWebsocketConsumer):
             'ticket': event['ticket']
         }))
 
+    async def chat_closed(self, event):
+        """Обрабатывает закрытие чата"""
+        await self.send(text_data=json.dumps({
+            'type': 'chat_closed',
+            'ticket_id': event['ticket_id']
+        }))
+
     @database_sync_to_async
     def get_user(self, user_id):
         return User.objects.select_related('department', 'position').filter(id=user_id).first()
