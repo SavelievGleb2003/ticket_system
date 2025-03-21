@@ -265,29 +265,49 @@ def tickets_analytics_for_the_department(request):
     users = CustomUser.objects.filter(department=user.department).exclude(id=user.department.boss.id)
     # Get the filter period from GET parameters (today, week, or month)
     time_filter = request.GET.get('time_filter', 'today')  # Default to 'today'
+    labels = [user.username for user in users]  # Extract usernames
+
 
     # Filter tickets based on time period
     if time_filter == 'today':
         tickets = tickets.filter(created_at__date=timezone.now().date())
+        closed_tickets = [Ticket.objects.filter(accepted_by=u, status="closed", created_at__date=timezone.now().date()).count() for u in users]
+        in_progress_tickets = [Ticket.objects.filter(accepted_by=u, status="in_progress", created_at__date=timezone.now().date()).count() for u in users]
     elif time_filter == 'week':
         start_of_week = timezone.now() - timedelta(days=timezone.now().weekday())
         tickets = tickets.filter(created_at__gte=start_of_week)
+        closed_tickets = [
+            Ticket.objects.filter(accepted_by=u, status="closed", created_at__gte=start_of_week).count() for u in users]
+        in_progress_tickets = [
+            Ticket.objects.filter(accepted_by=u, status="in_progress", created_at__gte=start_of_week).count() for u in users]
     elif time_filter == 'month':
-        tickets = tickets.filter(created_at__year=timezone.now().year,
-                                 created_at__month=timezone.now().month)
+        tickets = tickets.filter(created_at__year=timezone.now().year, created_at__month=timezone.now().month)
+        closed_tickets = [
+            Ticket.objects.filter(accepted_by=u, status="closed", created_at__year=timezone.now().year, created_at__month=timezone.now().month).count() for u in users]
+        in_progress_tickets = [
+            Ticket.objects.filter(accepted_by=u, status="in_progress", created_at__year=timezone.now().year, created_at__month=timezone.now().month).count() for u in
+            users]
+
     ticket_counts = {
         "closed": tickets.filter(status="closed").count(),
         "in_progress": tickets.filter(status="in_progress").count(),
         "open": tickets.filter(status="open").count(),
     }
+
     position_counts = {
         user.position.title: tickets.filter(position=user.position).count()
         for user in users
     }
 
+    print(labels, closed_tickets, in_progress_tickets)
+
     return render(request, 'data_analytics/data_analytics_for_the_department.html', {
         'tickets': tickets,
         'users': users,
-        "ticket_counts": ticket_counts,  # ✅ Pass to template
-        "position_counts": position_counts,  # ✅ Pass to template
+        "ticket_counts": ticket_counts,
+        "position_counts": position_counts,
+        'labels': labels,
+        'closed_tickets': closed_tickets,
+        'in_progress_tickets': in_progress_tickets
+
     })
