@@ -37,12 +37,13 @@
                     {{ ticket.created_by.profile.number|default:"У пользователя нету внутреннего номера" }}
                 {% endif %}
 
-            <p><strong>задача была принята:</strong>
+            <p><strong>Задача была принята:</strong>
                 {% if ticket.accepted_by %}
                     {% if ticket.accepted_by.first_name and ticket.created_by.last_name and ticket.accepted_by.position%}
                         {{ ticket.accepted_by.first_name }}
                         {{ ticket.accepted_by.last_name }}
-                        {{ ticket.accepted_by.position }}
+                        {{ ticket.accepted_by.position }} в
+                        {{ ticket.accepted_at }}
                     {% else %}
                         {{ ticket.accepted_by.username }}
                         {{ ticket.accepted_by.position }}
@@ -52,8 +53,18 @@
                 {% endif %}
                 {% if ticket.accepted_by.profile.number %}
                     внутренний номер: {{ ticket.accepted_by.profile.number }}
-                {% else %}
-
+                {% endif %}
+                <p><strong>Задача была закрыта:</strong>
+                {% if ticket.closed_at %}
+                     {% if ticket.accepted_by.first_name and ticket.created_by.last_name and ticket.accepted_by.position%}
+                        {{ ticket.accepted_by.first_name }}
+                        {{ ticket.accepted_by.last_name }}
+                        {{ ticket.accepted_by.position }} в
+                        {{ ticket.closed_at }}
+                    {% else %}
+                        {{ ticket.accepted_by.username }}
+                        {{ ticket.accepted_by.position }}
+                    {% endif %}
                 {% endif %}
             </p>
         </div>
