@@ -14,7 +14,7 @@
              data-ticket-id="{{ t.ticket.id }}"
              onclick="loadChat({{ t.ticket.id }})">
             <div class="flex flex-col text-left">
-                <span class="font-medium text-gray-800">Чат с {{ t.other_participant }} {{ t.other_participant.id }}</span>
+                <span class="font-medium text-gray-800">Чат с {{ t.other_participant }}</span>
             </div>
             <a href="{% url 'account:different_user_profile' t.other_participant.id %}" class="btn btn-ghost p-1 hover:ring-2 hover:ring-primary rounded-full transition-all"
                onclick="event.stopPropagation();">
