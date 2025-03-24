@@ -122,6 +122,8 @@
         socket.close();
     }
 
+    localStorage.setItem("openChatId", ticketId);
+
     fetch(`/chat/${ticketId}/`)
         .then(response => response.text())
         .then(html => {
@@ -236,10 +238,22 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'ticket_accepted':
                 updateTicket(data.ticket);
                 showNotification('Задача принята', `${data.ticket.title} принята ${data.ticket.accepted_by}`);
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
                 break;
             case 'ticket_closed':
                 updateTicket(data.ticket);
                 showNotification('Задача закрыта', `${data.ticket.title} завершена ${data.ticket.closed_at}`);
+
+                // Если закрываемый тикет — это тот, у которого открыт чат, закрываем чат
+                const openChatId = localStorage.getItem("openChatId");
+                if (openChatId == data.ticket.id) {
+                    closeChat();
+                }
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
                 break;
         }
     };
@@ -331,6 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (ticket.accepted_by) {
             acceptedInfo = `${ticket.accepted_by} в ${ticket.accepted_at}`;
         }
+
         let closedInfo = ticket.closed_at
             ? `<p class="text-gray-500">Закрыл: ${ticket.accepted_by} в ${ticket.closed_at}</p>`
             : '';
@@ -431,6 +446,8 @@ function closeChat() {
     localStorage.removeItem("openChatId"); // Удаляем сохранённый ID чата
 }
 
+
+
 document.addEventListener("DOMContentLoaded", function () {
         const chatContainer = document.getElementById("chat-container");
         const openChatBtn = document.getElementById("open-chat-btn");
@@ -481,6 +498,35 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     });
+
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".close-ticket-btn").forEach(button => {
+        button.addEventListener("click", function() {
+            const ticketId = this.dataset.ticketId;
+
+            fetch(`/tickets/close/${ticketId}/`, { method: "POST" })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Тикет закрыт', `Тикет №${ticketId} был закрыт.`);
+
+                        // Если закрытый тикет совпадает с текущим открытым чатом, закрываем его
+                        const openChatId = localStorage.getItem("openChatId");
+                        if (openChatId == ticketId) {
+                            closeChat();
+                        }
+                          // Перезагрузка страницы
+                        setTimeout(() => {
+                            location.reload();
+                        }, 500);
+                    }
+                })
+                .catch(error => console.error("Ошибка при закрытии тикета:", error));
+        });
+    });
+});
 
 </script>
 {% endblock %}

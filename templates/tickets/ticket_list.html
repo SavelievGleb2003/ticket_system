@@ -238,6 +238,9 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'ticket_accepted':
                 updateTicket(data.ticket);
                 showNotification('Задача принята', `${data.ticket.title} принята ${data.ticket.accepted_by}`);
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
                 break;
             case 'ticket_closed':
                 updateTicket(data.ticket);
@@ -247,12 +250,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const openChatId = localStorage.getItem("openChatId");
                 if (openChatId == data.ticket.id) {
                     closeChat();
-
-                    // Перезагрузка страницы
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
                 }
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
                 break;
         }
     };
