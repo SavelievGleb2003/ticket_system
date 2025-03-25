@@ -145,11 +145,16 @@
                         </div>
                         <button type="submit" class="btn btn-success w-100 fw-bold">Закрыть задание</button>
                     </form>
-                {% else %}
-<!--                    <p class="text-gray-500">you don't have close rights to close ticket.</p>-->
                 {% endif %}
             {% else %}
-                <p class="text-gray-500">Задание закрыто.</p>
+                <div class="mb-3">
+                <label class="form-label fw-bold">Комментарий:</label>
+                <div class="p-2 border rounded bg-white" style="word-wrap: break-word;">
+                    {{ ticket.completion_comment }}
+                </div>
+            </div>
+
+
             {% endif %}
         </div>
     </div>

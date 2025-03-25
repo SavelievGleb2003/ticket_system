@@ -28,7 +28,12 @@
 <body class="bg-gray-100 theme-transition min-h-screen flex flex-col">
     <nav class="bg-base-200 shadow-lg sticky top-0 z-10">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="{% url 'tickets:ticket_list_created_by' %}" class="text-2xl font-bold hover:text-primary transition-colors">ЮЖК</a>
+
+
+            <a href="{% url 'tickets:ticket_list_created_by' %}">
+                <img src="/media/tickets/logo-ru.svg" alt="Company Logo" width="150" class="logo-filter">
+            </a>
+
 
             {% if request.user.is_authenticated %}
             <div class="hidden md:flex items-center space-x-6">
