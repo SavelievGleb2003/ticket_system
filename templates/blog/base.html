@@ -31,8 +31,10 @@
 
 
             <a href="{% url 'tickets:ticket_list_created_by' %}">
-                <img src="/media/tickets/logo-ru.svg" alt="Company Logo" width="150" class="logo-filter">
+                <img id="moon-icon" src="/media/tickets/logo-ru-x.svg" alt="Company Logo" width="150">
+                <img id="sun-icon" src="/media/tickets/logo-ru-x-light.svg" alt="Company Logo" width="150" class="logo-filter hidden">
             </a>
+
 
 
             {% if request.user.is_authenticated %}
@@ -192,6 +194,7 @@
                 document.getElementById("theme-icon").classList.remove("rotate-[360deg]");
             }, 500);
         }
+
     </script>
 </body>
 </html>
