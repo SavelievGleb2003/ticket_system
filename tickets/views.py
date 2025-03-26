@@ -41,7 +41,7 @@ def ticket_list(request):
 
     # Retrieve chat info
     chat = Chat.objects.filter(
-        Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+        Q(ticket__accepted_by=user) | Q(ticket__created_by=user), is_active=True
     ).first()
 
     chat_id = chat.ticket.id if chat else None
@@ -68,7 +68,7 @@ def ticket_list_created_by(request):
                                  created_at__month=timezone.now().month)
 
     chat = Chat.objects.filter(
-        Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+        Q(ticket__accepted_by=user) | Q(ticket__created_by=user), is_active=True
     ).first()
 
     chat_id = chat.ticket.id if chat else None
@@ -95,7 +95,7 @@ def ticket_list_accepted_by(request):
                                  created_at__month=timezone.now().month)
 
     chat = Chat.objects.filter(
-        Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+        Q(ticket__accepted_by=user) | Q(ticket__created_by=user), is_active=True
     ).first()
 
     chat_id = chat.ticket.id if chat else None
@@ -143,7 +143,7 @@ def ticket_list_for_boss(request):
 
     # Retrieve chat info
     chat = Chat.objects.filter(
-        Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+        Q(ticket__accepted_by=user) | Q(ticket__created_by=user), is_active=True
     ).first()
 
     chat_id = chat.ticket.id if chat else None
@@ -228,13 +228,14 @@ def close_ticket(request, ticket_id):
     ticket.status = 'closed'
     ticket.save()
 
-    # Удаляем связанный чат, если он существует
+    # Делаем чат неактивным, а не удаляем его
     if hasattr(ticket, 'chat'):
-        ticket.chat.delete()
+        ticket.chat.is_active = False
+        ticket.chat.save()
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            f"chat_{ticket.id}",  # Группа, соответствующая чату тикета
+            f"chat_{ticket.id}",
             {
                 "type": "chat_closed",
                 "ticket_id": ticket.id

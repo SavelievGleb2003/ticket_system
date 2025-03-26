@@ -115,6 +115,7 @@
 
 <script>
     let socket; // Переменная для хранения сокета
+    let isChatActive = false; // Флаг активности чата
 
     function loadChat(ticketId) {
     // Закрываем текущий сокет, если он есть
@@ -123,6 +124,7 @@
     }
 
     localStorage.setItem("openChatId", ticketId);
+    isChatActive = true; // Устанавливаем флаг активности
 
     fetch(`/chat/${ticketId}/`)
         .then(response => response.text())
@@ -397,7 +399,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Проверяем, был ли открыт чат перед перезагрузкой
     const savedChatId = localStorage.getItem("openChatId");
-    if (savedChatId) {
+    if (savedChatId && isChatActive) {
         // Проверяем, существует ли тикет
         fetch(`/chat/${savedChatId}/`)
             .then(response => {
@@ -444,6 +446,7 @@ function closeChat() {
     }
 
     localStorage.removeItem("openChatId"); // Удаляем сохранённый ID чата
+    isChatActive = false
 }
 
 

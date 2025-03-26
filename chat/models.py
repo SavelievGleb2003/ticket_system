@@ -17,6 +17,8 @@ class Chat(models.Model):
     participants = models.ManyToManyField(CustomUser)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    is_active = models.BooleanField(default=True)  # Добавляем флаг активности
+
     def __str__(self):
         return f"Chat for Ticket #{self.ticket.id}"
 

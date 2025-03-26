@@ -4,7 +4,7 @@ from .models import Chat, ChatMessage
 
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
-    list_display = ['ticket', 'created_at']
+    list_display = ['ticket', 'created_at', 'is_active']
 
 
 

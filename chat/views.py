@@ -37,7 +37,7 @@ def chat_detail(request, ticket_id):
     # Retrieve all messages for the chat (ordered by timestamp)
     messages = ChatMessage.objects.filter(chat=chat).order_by('timestamp')
     chats = Chat.objects.filter(
-        Q(ticket__accepted_by=request.user) | Q(ticket__created_by=request.user)
+        Q(ticket__accepted_by=request.user) | Q(ticket__created_by=request.user), is_active=True
     )
     for ticket in chats:
         # Получаем чат
