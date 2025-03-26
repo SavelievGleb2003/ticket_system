@@ -31,8 +31,8 @@
 
 
             <a href="{% url 'tickets:ticket_list_created_by' %}">
-                <img id="moon-icon" src="/media/tickets/logo-ru-x.svg" alt="Company Logo" width="150">
-                <img id="sun-icon" src="/media/tickets/logo-ru-x-light.svg" alt="Company Logo" width="150" class="logo-filter hidden">
+                <img id="darkLogo" src="/media/tickets/logo-ru-x.svg" alt="Company Logo" width="150" class="logo-filter hidden">
+                <img id="lightLogo" src="/media/tickets/logo-ru-x-light.svg" alt="Company Logo" width="150">
             </a>
 
 
@@ -40,7 +40,13 @@
             {% if request.user.is_authenticated %}
             <div class="hidden md:flex items-center space-x-6">
                 {% if request.user == request.user.department.boss %}
-                    <a href="{% url 'tickets:data_analytics_for_the_department' %}" class="btn btn-ghost hover:bg-base-300">Аналитика данных</a>
+                    <div class="dropdown dropdown-hover">
+                        <label tabindex="0" class="btn btn-ghost hover:bg-base-300">Аналитика</label>
+                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                            <li><a href="{% url 'tickets:data_analytics_for_the_department' %}">Графики</a></li>
+                            <li><a href="{% url 'tickets:ticket_list_for_boss' %}">Работники</a></li>
+                        </ul>
+                    </div>
                 {% endif %}
                 <a href="{% url 'tickets:ticket_list' %}" class="btn btn-ghost hover:bg-base-300">Задания</a>
                 <a href="{% url 'tickets:ticket_list_created_by' %}" class="btn btn-ghost hover:bg-base-300">Мои задания</a>
@@ -179,13 +185,21 @@
             // Toggle icon visibility
             const sunIcon = document.getElementById("sun-icon");
             const moonIcon = document.getElementById("moon-icon");
+            const lightLogo = document.getElementById("lightLogo");
+            const darkLogo = document.getElementById("darkLogo");
 
             if (theme === "dark") {
                 moonIcon.classList.remove("hidden");
                 sunIcon.classList.add("hidden");
+                darkLogo.classList.remove("hidden");
+                lightLogo.classList.add("hidden");
+
             } else {
                 sunIcon.classList.remove("hidden");
                 moonIcon.classList.add("hidden");
+                lightLogo.classList.remove("hidden");
+                darkLogo.classList.add("hidden");
+
             }
 
             // Animate icon

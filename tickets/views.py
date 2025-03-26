@@ -107,6 +107,54 @@ def ticket_list_accepted_by(request):
 
 
 @login_required
+def ticket_list_for_boss(request):
+    user = request.user
+    chat_id = None
+    tickets = Ticket.objects.filter(
+        department=user.department
+    )
+    users = CustomUser.objects.filter(department=user.department).exclude(id=user.department.boss.id)
+
+    # Get the filter period from GET parameters (today, week, or month)
+    time_filter_user = request.GET.get('time_filter_user', 'today')  # Default to 'today'
+
+    # Filter tickets based on time period
+    if time_filter_user == 'today':
+        tickets = tickets.filter(created_at__date=timezone.now().date())
+    elif time_filter_user == 'week':
+        start_of_week = timezone.now() - timedelta(days=timezone.now().weekday())
+        tickets = tickets.filter(created_at__gte=start_of_week)
+    elif time_filter_user == 'month':
+        tickets = tickets.filter(created_at__year=timezone.now().year,
+                                 created_at__month=timezone.now().month)
+
+    specific_user = request.GET.get('specific_user', '')
+    if specific_user:
+        try:
+            specific_user = int(specific_user)  # Convert to an integer
+            tickets = tickets.filter(accepted_by=specific_user)
+        except ValueError:
+            pass  # If conversion fails, do nothing (avoid crashing)
+
+    specific_status = request.GET.get('specific_status', '')
+    if specific_status:
+        tickets = tickets.filter(status=specific_status)
+
+    # Retrieve chat info
+    chat = Chat.objects.filter(
+        Q(ticket__accepted_by=user) | Q(ticket__created_by=user)
+    ).first()
+
+    chat_id = chat.ticket.id if chat else None
+
+    return render(request, 'tickets/ticket_list_for_boss.html', {
+        'tickets': tickets,
+        'users': users,
+        'chat_id': chat_id
+    })
+
+
+@login_required
 def ticket_detail(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
@@ -311,8 +359,6 @@ def tickets_analytics_for_the_department(request):
         user.position.title: tickets.filter(position=user.position).count()
         for user in users
     }
-
-    print(labels, closed_tickets, in_progress_tickets)
 
     return render(request, 'data_analytics/data_analytics_for_the_department.html', {
         'tickets': tickets,

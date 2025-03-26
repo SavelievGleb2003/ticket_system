@@ -54,8 +54,8 @@
                 {% if ticket.accepted_by.profile.number %}
                     внутренний номер: {{ ticket.accepted_by.profile.number }}
                 {% endif %}
-                <p><strong>Задача была закрыта:</strong>
                 {% if ticket.closed_at %}
+                    <p><strong>Задача была закрыта:</strong>
                      {% if ticket.accepted_by.first_name and ticket.created_by.last_name and ticket.accepted_by.position%}
                         {{ ticket.accepted_by.first_name }}
                         {{ ticket.accepted_by.last_name }}
