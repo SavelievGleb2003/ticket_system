@@ -54,9 +54,14 @@
                 <input type="text" name="full_name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="full_name_input" value="{{ profile.user.get_full_name }}">
             </div>
 
-            <div class="mb-4">
-                <label for="date_of_birthday_input" class="block text-gray-700 text-sm font-bold mb-2">Дата рождения:</label>
-                <input type="date" name="date_of_birthday" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="date_of_birthday_input" value="">
+           <div class="mb-4">
+                <label for="date_of_birthday_input" class="block text-gray-700 text-sm font-bold mb-2">
+                    Дата рождения:
+                </label>
+                <input type="date" name="date_of_birthday"
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                       id="date_of_birthday_input"
+                       value="{{ profile.date_of_birthday|date:'Y-m-d' }}">
             </div>
 
             <div class="mb-4">
@@ -94,7 +99,7 @@
         setDefaultDate();
     }
 
-    function setDefaultDate() {
+     function setDefaultDate() {
         const dateInput = document.getElementById("date_of_birthday_input");
         if (!dateInput.value) {
             const today = new Date();
@@ -104,6 +109,9 @@
             dateInput.value = `${year}-${month}-${day}`;
         }
     }
+
+    // Run when page loads
+    document.addEventListener("DOMContentLoaded", setDefaultDate);
 </script>
 
 {% endblock %}

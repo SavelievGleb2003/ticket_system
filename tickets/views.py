@@ -111,6 +111,7 @@ def ticket_list_for_boss(request):
     user = request.user
     chat_id = None
     tickets = Ticket.objects.filter(
+        Q(status="closed") | Q(status="in_progress"),
         department=user.department
     )
     users = CustomUser.objects.filter(department=user.department).exclude(id=user.department.boss.id)
