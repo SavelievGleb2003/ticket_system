@@ -28,8 +28,7 @@ def chat_detail(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
     has_access = request.user == ticket.created_by or request.user == ticket.accepted_by
-    if not has_access:
-        return HttpResponseForbidden("Доступ запрещен")
+
     chat = get_object_or_404(Chat, ticket=ticket, is_active=True)
     # Проходимся по тикетам и ищем "другого" участника чата
 
@@ -51,3 +50,18 @@ def chat_detail(request, ticket_id):
         'has_access': has_access,  # <-- передаем в шаблон
         'tickets': chats
     })
+
+def get_chat_boss(request, chat_id):
+    first_sender = None
+    chat = get_object_or_404(Chat, id=chat_id)
+    messages = ChatMessage.objects.filter(chat=chat).order_by('timestamp')
+    if messages:
+        first_sender = messages.first().sender
+    if request.user == chat.ticket.department.boss:
+        return render(request, 'chat/get_chat_boss.html', {
+            'chat': chat,
+            'messages': messages,
+            'first_sender': first_sender
+        })
+
+    return HttpResponseForbidden("Доступ запрещен")

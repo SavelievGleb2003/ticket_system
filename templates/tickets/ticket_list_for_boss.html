@@ -75,6 +75,15 @@
                     </p>
 
                     <a href="{% url 'tickets:ticket_detail' ticket.id %}" class="btn btn-secondary mt-2">Посмотреть детали</a>
+                    {% if ticket.chat.messages %}
+                    <button class="btn btn-accent open-chat mt-2" data-ticket-id="{{ ticket.chat.id }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M2.25 8.25v7.5A2.25 2.25 0 004.5 18h2.25l3.75 3V18h7.5a2.25 2.25 0 002.25-2.25v-7.5A2.25 2.25 0 0018.75 6h-13.5A2.25 2.25 0 002.25 8.25z" />
+                        </svg>
+                        <span>Открыть чат</span>
+                    </button>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
@@ -96,21 +105,6 @@
 
 </div>
 <!-- Кнопка открытия чата -->
-{% if chat_id %}
-
-    <button id="open-chat-btn" class="btn btn-accent open-chat fixed bottom-4 right-4" class="btn btn-accent fixed bottom-4 right-4" data-ticket-id="{{ chat_id }}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M2.25 8.25v7.5A2.25 2.25 0 004.5 18h2.25l3.75 3V18h7.5a2.25 2.25 0 002.25-2.25v-7.5A2.25 2.25 0 0018.75 6h-13.5A2.25 2.25 0 002.25 8.25z" />
-        </svg>
-        <span>Открыть чат</span>
-    </button>
-{% else %}
-
-{% endif %}
-<!-- джс для подгрузки є -->
-
-
 <style>
 #chat-container {
     position: fixed;
@@ -135,420 +129,40 @@
 }
 </style>
 
-<script>
-    let socket; // Переменная для хранения сокета
-
-    function loadChat(ticketId) {
-    // Закрываем текущий сокет, если он есть
-    if (socket) {
-        socket.close();
-    }
-
-    localStorage.setItem("openChatId", ticketId);
-
-    fetch(`/chat/${ticketId}/`)
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('chat-container').innerHTML = html; // Загружаем чат в нужное место
-            document.getElementById('chat-container').classList.remove('hidden'); // Показываем чат
-            initializeChat(ticketId); // Инициализируем WebSocket
-        })
-        .catch(error => console.error("Ошибка загрузки чата:", error));
-    }
-
-
-
-
-    function initializeChat(ticketId) {
-        const socketURL = `ws://${window.location.host}/ws/chat/${ticketId}/`;
-        console.log("Establishing Socket Connection for Ticket:", ticketId);
-        socket = new WebSocket(socketURL); // Создаем новый сокет
-
-        const msgForm = document.getElementById("msg-form");
-        if (msgForm) {
-            msgForm.addEventListener("submit", function (event) {
-                event.preventDefault();
-                let message_sent = document.getElementById("message").value;
-                socket.send(JSON.stringify({ message: message_sent }));
-            });
-        }
-
-        const chatsDiv = document.getElementById("chats-container");
-        const scrollToBottom = () => {
-            chatsDiv.scrollTop = chatsDiv.scrollHeight;
-        };
-
-        socket.addEventListener("message", (e) => {
-            const data = JSON.parse(e.data)["message"];
-            let sender = data["sender"];
-            let content = data["message"];
-
-            if (sender == "{{user}}") {
-                document.getElementById("message").value = "";
-            }
-
-            chatsDiv.innerHTML += `<div class="flex ${sender == "{{user}}" ? "justify-end" : "justify-start"}">
-                <div class="max-w-xs px-4 py-2 rounded-lg ${sender == "{{user}}" ? "bg-purple-600 text-white" : "bg-orange-500 text-white"}">
-                    <p class="font-semibold" style="word-wrap: break-word;">${content}</p>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500 ${sender == "{{user}}" ? "text-right" : "text-left"}">${sender == "{{user}}" ? "Me" : sender}</p>`;
-
-            scrollToBottom();
-        });
-    }
-
-
-
-
-
-
-</script>
 <!-- Встроенный JavaScript для WebSocket -->
 <script>
-
     document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".open-chat").forEach(button => {
-        button.addEventListener("click", function () {
-            const ticketId = this.dataset.ticketId;
-            const chatContainer = document.getElementById("chat-container");
-
-            fetch(`/chat/${ticketId}/`)
-                .then(response => response.text())
-                .then(html => {
-                    chatContainer.innerHTML = html;
-                    chatContainer.classList.remove("hidden"); // Показываем чат
-                    initializeChat(ticketId); // Инициализация JavaScript чата
-                })
-                .catch(error => console.error("Ошибка загрузки чата:", error));
-        });
-    });
-});
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    const openChatBtn = document.querySelector(".open-chat");
-    const chatContainer = document.getElementById("chat-container");
-    const ticketContainer = document.getElementById("ticket-container");
-
-    openChatBtn.addEventListener("click", function () {
-        chatContainer.classList.remove("hidden"); // Показать чат
-        ticketContainer.classList.add("lg:col-span-3"); // Сдвинуть тикеты влево
-    });
-});
-document.addEventListener('DOMContentLoaded', function() {
-    // Проверяем, что мы на странице со списком тикетов
-    const ticketListContainer = document.querySelector('.grid');
-    if (!ticketListContainer) return;
-
-    // Инициализируем WebSocket
-    const ticketSocket = new WebSocket(
-        'ws://' + window.location.host + '/ws/tickets/'
-    );
-
-    ticketSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        console.log('Получено уведомление:', data);
-
-        // Обрабатываем полученное событие
-        switch(data.type) {
-            case 'ticket_created':
-                handleNewTicket(data.ticket);
-                showNotification('Новая задача', `${data.ticket.title} создана ${data.ticket.created_by}`);
-                break;
-            case 'ticket_accepted':
-                updateTicket(data.ticket);
-                showNotification('Задача принята', `${data.ticket.title} принята ${data.ticket.accepted_by}`);
-                setTimeout(() => {
-                    location.reload();
-                }, 500);
-                break;
-            case 'ticket_closed':
-                updateTicket(data.ticket);
-                showNotification('Задача закрыта', `${data.ticket.title} завершена ${data.ticket.closed_at}`);
-
-                // Если закрываемый тикет — это тот, у которого открыт чат, закрываем чат
-                const openChatId = localStorage.getItem("openChatId");
-                if (openChatId == data.ticket.id) {
-                    closeChat();
-                }
-                setTimeout(() => {
-                    location.reload();
-                }, 500);
-                break;
-        }
-    };
-
-    ticketSocket.onclose = function(e) {
-        console.error('Соединение с сервером тикетов закрыто');
-    };
-
-    // Добавляет новый тикет в список
-    function handleNewTicket(ticket) {
-        // Проверяем, не существует ли уже этот тикет в списке
-        const existingTicket = document.querySelector(`[data-ticket-id="${ticket.id}"]`);
-        if (existingTicket) {
-            updateTicket(ticket);
-            return;
-        }
-
-        // Создаем элемент для нового тикета
-        const ticketElement = createTicketElement(ticket);
-        ticketListContainer.append(ticketElement);
-    }
-
-    // Обновляет существующий тикет
-    function updateTicket(ticket) {
-        const existingTicket = document.querySelector(`[data-ticket-id="${ticket.id}"]`);
-        if (!existingTicket) return;
-
-        // Обновляем статус
-        const statusBadge = existingTicket.querySelector('.badge');
-        if (statusBadge) {
-            // Удаляем существующие классы статуса
-            statusBadge.classList.remove('badge-error', 'badge-warning', 'badge-success');
-
-            // Добавляем новый класс в зависимости от статуса
-            if (ticket.status === 'open') {
-                statusBadge.classList.add('badge-error');
-                statusBadge.textContent = 'Открыт';
-            } else if (ticket.status === 'in_progress') {
-                statusBadge.classList.add('badge-warning');
-                statusBadge.textContent = 'В процессе';
-            } else {
-                statusBadge.classList.add('badge-success');
-                statusBadge.textContent = 'Закрыт';
-            }
-        }
-
-        // Обновляем информацию о принявшем
-        const acceptedByElement = existingTicket.querySelector('p:nth-of-type(3)');
-        if (acceptedByElement) {
-            if (ticket.accepted_by) {
-                acceptedByElement.textContent = `Принял: ${ticket.accepted_by} в ${ticket.accepted_at}`;
-            } else {
-                acceptedByElement.textContent = 'Принял: На данный момент не принята';
-            }
-
-        }
-        const closedInfoElement = existingTicket.querySelector('p:nth-of-type(4)'); // Или используйте класс, если добавили
-        if (closedInfoElement) {
-            if (ticket.closed_at) {
-                closedInfoElement.textContent = `Закрыл: ${ticket.accepted_by} в ${ticket.closed_at}`;
-            }
-        }
-    }
-
-    // Создает элемент тикета
-    function createTicketElement(ticket) {
-        console.log('Данные тикета при создании:', ticket); // Отладка
-        const ticketDiv = document.createElement('div');
-        ticketDiv.className = 'card bg-base-100 shadow-xl border border-gray-200';
-        ticketDiv.setAttribute('data-ticket-id', ticket.id);
-
-        // Определяем класс для бейджа в зависимости от статуса
-        let badgeClass = '';
-        let statusText = '';
-
-        if (ticket.status === 'open') {
-            badgeClass = 'badge-error';
-            statusText = 'Открыт';
-        } else if (ticket.status === 'in_progress') {
-            badgeClass = 'badge-warning';
-            statusText = 'В процессе';
-        } else {
-            badgeClass = 'badge-success';
-            statusText = 'Закрыт';
-        }
-
-        // Информация о принявшем
-        let acceptedInfo = 'На данный момент не принята';
-        if (ticket.accepted_by) {
-            acceptedInfo = `${ticket.accepted_by} в ${ticket.accepted_at}`;
-        }
-
-        let closedInfo = ticket.closed_at
-            ? `<p class="text-gray-500">Закрыл: ${ticket.accepted_by} в ${ticket.closed_at}</p>`
-            : '';
-
-        ticketDiv.innerHTML = `
-            <div class="card-body">
-                <h2 class="card-title text-xl font-semibold">Задания №${ticket.id}</h2>
-                <h3 class="card-title text-xl font-semibold">${ticket.title}</h3>
-
-                <p class="text-gray-500">Статус:
-                    <span class="badge ${badgeClass}">${statusText}</span>
-                </p>
-                <p class="text-gray-500">Создал:
-                    ${ticket.created_by} в ${ticket.created_at}
-                </p>
-                <p class="text-gray-500">Принял:
-                    ${acceptedInfo}
-                </p>
-                 ${closedInfo}
-
-                <a href="/ticket/${ticket.id}/" class="btn btn-secondary mt-2">Посмотреть детали</a>
-            </div>
-        `;
-
-        return ticketDiv;
-    }
-
-    // Показывает уведомление в браузере
-    function showNotification(title, body) {
-        if ('Notification' in window) {
-            if (Notification.permission === 'granted') {
-                new Notification(title, { body });
-            } else if (Notification.permission !== 'denied') {
-                Notification.requestPermission().then(permission => {
-                    if (permission === 'granted') {
-                        new Notification(title, { body });
-                    }
-                });
-            }
-        }
-    }
-});
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    const chatContainer = document.getElementById("chat-container");
-    const openChatBtn = document.getElementById("open-chat-btn");
-    const ticketContainer = document.getElementById("ticket-container");
-
-    // Проверяем, был ли открыт чат перед перезагрузкой
-    const savedChatId = localStorage.getItem("openChatId");
-    if (savedChatId) {
-        // Проверяем, существует ли тикет
-        fetch(`/chat/${savedChatId}/`)
-            .then(response => {
-                if (response.status === 404) {
-                    // Тикет не существует, очищаем localStorage
-                    localStorage.removeItem("openChatId");
-                    console.log("Сохраненный чат был удален");
-                    return;
-                }
-                // Если чат существует, загружаем его
-                loadChat(savedChatId);
-            })
-            .catch(error => {
-                console.error("Ошибка проверки тикета:", error);
-                localStorage.removeItem("openChatId"); // Очищаем localStorage при ошибке
-            });
-    }
-
-    document.querySelectorAll(".open-chat").forEach(button => {
-        button.addEventListener("click", function () {
-            const ticketId = this.dataset.ticketId;
-            localStorage.setItem("openChatId", ticketId); // Сохраняем ID чата
-            loadChat(ticketId);
-        });
-    });
-});
-
-// Функция закрытия чата
-function closeChat() {
-    const chatContainer = document.getElementById('chat-container');
-    const openChatBtn = document.getElementById('open-chat-btn');
-    const ticketContainer = document.getElementById('ticket-container');
-
-    if (chatContainer) {
-        chatContainer.classList.add('hidden'); // Прячем чат
-    }
-
-    if (openChatBtn) {
-        openChatBtn.classList.remove('hidden'); // Показываем кнопку "Открыть чат" обратно
-    }
-
-    if (ticketContainer) {
-        ticketContainer.classList.remove('lg:col-span-3'); // Возвращаем ширину тикетов в норму
-    }
-
-    localStorage.removeItem("openChatId"); // Удаляем сохранённый ID чата
-}
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-        const chatContainer = document.getElementById("chat-container");
-        const openChatBtn = document.getElementById("open-chat-btn");
-
-        // Проверяем, был ли открыт чат перед перезагрузкой
-        const savedChatId = localStorage.getItem("openChatId");
-
-        // Функция для обновления localStorage
-        function updateLocalStorage() {
-            if (chatContainer && !chatContainer.classList.contains("hidden")) {
-                // Чат открыт, получаем ticketId
-                const currentTicketId = chatContainer.dataset.ticketId; // Предполагаем, что у chat-container есть data-ticket-id
-
-                if (currentTicketId) {
-                    localStorage.setItem("openChatId", currentTicketId);
-                }
-            } else {
-                // Чат не открыт, очищаем localStorage
-                localStorage.removeItem("openChatId");
-            }
-        }
-
-        // Обновляем localStorage при загрузке страницы
-        updateLocalStorage();
-
-        if (savedChatId) {
-            // Проверяем, существует ли тикет
-            fetch(`/chat/${savedChatId}/`)
-                .then(response => {
-                    if (response.status === 404) {
-                        // Тикет не существует, очищаем localStorage
-                        localStorage.removeItem("openChatId");
-                        return;
-                    }
-                    loadChat(savedChatId);
-                })
-                .catch(error => {
-                    console.error("Ошибка проверки тикета:", error);
-                    localStorage.removeItem("openChatId"); // Очищаем localStorage при ошибке
-                });
-        }
-
         document.querySelectorAll(".open-chat").forEach(button => {
             button.addEventListener("click", function () {
                 const ticketId = this.dataset.ticketId;
-                localStorage.setItem("openChatId", ticketId); // Сохраняем ID чата
-                loadChat(ticketId);
+                const chatContainer = document.getElementById("chat-container");
+
+                fetch(`/chat/boss/${ticketId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        chatContainer.innerHTML = html;
+                        chatContainer.classList.remove("hidden"); // Показываем чат
+                        initializeChat(ticketId); // Инициализация JavaScript чата
+                    })
+                    .catch(error => console.error("Ошибка загрузки чата:", error));
             });
         });
     });
 
+    // Функция закрытия чата
+    function closeChat() {
+        const chatContainer = document.getElementById('chat-container');
+        const ticketContainer = document.getElementById('ticket-container');
 
+        if (chatContainer) {
+            chatContainer.classList.add('hidden'); // Прячем чат
+        }
 
-    document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll(".close-ticket-btn").forEach(button => {
-        button.addEventListener("click", function() {
-            const ticketId = this.dataset.ticketId;
+        if (ticketContainer) {
+            ticketContainer.classList.remove('lg:col-span-3'); // Возвращаем ширину тикетов в норму
+        }
 
-            fetch(`/tickets/close/${ticketId}/`, { method: "POST" })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification('Тикет закрыт', `Тикет №${ticketId} был закрыт.`);
-
-                        // Если закрытый тикет совпадает с текущим открытым чатом, закрываем его
-                        const openChatId = localStorage.getItem("openChatId");
-                        if (openChatId == ticketId) {
-                            closeChat();
-                        }
-                          // Перезагрузка страницы
-                        setTimeout(() => {
-                            location.reload();
-                        }, 500);
-                    }
-                })
-                .catch(error => console.error("Ошибка при закрытии тикета:", error));
-        });
-    });
-});
-
+        localStorage.removeItem("openChatId"); // Удаляем сохранённый ID чата
+    }
 </script>
 {% endblock %}
