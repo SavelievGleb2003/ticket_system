@@ -274,7 +274,7 @@ def redirect_ticket(request, ticket_id):
             ticket.save()
 
             messages.success(request, "Задача успешно перенаправлена, теперь ее может принять другой сотрудник.")
-            return redirect('tickets:ticket_detail', ticket_id=ticket.id)
+            return redirect('tickets:ticket_list')
     else:
         form = TicketRedirectForm(instance=ticket)
 
