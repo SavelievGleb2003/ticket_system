@@ -5,7 +5,7 @@
 <button type="button" onclick="closeChat()" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-xl font-bold">&times;</button>
 <h1 class="text-2xl font-bold text-center text-gray-800">Чат для задания #{{ chat.ticket.id }}</h1>
 {% if messages %}
-<div class="chats-container overflow-y-auto h-80 p-4 border rounded-lg bg-gray-50" id="chats-container">
+<div class="chats-container overflow-y-auto h-auto min-h-[500px] p-4 border rounded-lg bg-gray-50" id="chats-container">
 
     {% for message in messages %}
         <div class="flex {% if message.sender == first_sender %}justify-end{% else %}justify-start{% endif %}">

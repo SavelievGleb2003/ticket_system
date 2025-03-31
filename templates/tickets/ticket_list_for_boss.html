@@ -29,8 +29,8 @@
                 <label class="font-semibold">по статусу:</label>
                 <select name="specific_status" class="select select-bordered" onchange="this.form.submit()">
                     <option value=''>Все статусы</option>
-                    <option value="closed" {% if request.GET.specific_status == "closed" %}selected{% endif %}>Closed</option>
-                    <option value="in_progress" {% if request.GET.specific_status == "in_progress" %}selected{% endif %}>In progress</option>
+                    <option value="closed" {% if request.GET.specific_status == "closed" %}selected{% endif %}>Закрытые</option>
+                    <option value="in_progress" {% if request.GET.specific_status == "in_progress" %}selected{% endif %}>В процессе</option>
                 </select>
             </div>
         </div>
